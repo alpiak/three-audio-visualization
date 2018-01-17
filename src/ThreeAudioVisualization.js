@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import Physijs from './vendors/physijs/physi';
 
-import { generateTile } from './utils';
+import { generateTile, glow } from './utils';
 
 Physijs.scripts.worker = require('./vendors/physijs/physijs_worker.js');
 Physijs.scripts.ammo = require('ammo.js');
@@ -27,6 +27,7 @@ export default class ThreeAudioVisualization {
 
     init(width, height) {
         this._scene = new Physijs.Scene();
+        this._scene.setGravity(new THREE.Vector3( 0, 0, 0 ));
         this._camera = new THREE.PerspectiveCamera(45, width / height, .1, 1000);
         this._renderer = new THREE.WebGLRenderer();
 
@@ -39,7 +40,7 @@ export default class ThreeAudioVisualization {
         const ambientLight = new THREE.AmbientLight(0xdddddd);
         const spotLight = new THREE.SpotLight(0x999999);
 
-        spotLight.position.set(0, 500, 500);
+        spotLight.position.set(0, 200, 100);
 
         this._scene.add(ambientLight);
         this._scene.add(spotLight);
@@ -57,10 +58,13 @@ export default class ThreeAudioVisualization {
                                 [-36, -60, 0],   [-12, -60, 0]
             ];
 
-        tilePositions.forEach(position => {
+        tilePositions.forEach((position, index) => {
             const tile = generateTile();
+
             tile.position.set(...position);
+            glow(tile);
             this._scene.add(tile);
+            this._tiles[index] = tile;
         });
     }
 
