@@ -7,8 +7,33 @@
 			body {
 				margin: 0;
 			}
+
+			.tool-bar {
+				position: absolute;
+				top: 0;
+				right: 0;
+				width: 310px;
+			}
 		</style>
 	</head>
 	<body>
+		<div class="tool-bar">
+			<div id="tool-bar__tile-animation">
+				<select>
+					<option value="shake">Shake</option>
+				</select>
+				<input placeholder="Tile Id">
+				<button>Animate</button>
+			</div>
+			<div id="tool-bar__tiles-animation">
+				<input value="-100" class="x" placeholder="">
+				<input value="-100" class="y" placeholder="Y">
+				<input value="0" class="z" placeholder="Z">
+				<input value=".1" class="speed" placeholder="Speed">
+				<input value="1" class="power" placeholder="Power">
+				<input class="color" placeholder="Color">
+				<button class="wave">Wave</button>
+			</div>
+		</div>
 	</body>
 </html>

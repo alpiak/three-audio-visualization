@@ -4,17 +4,22 @@
 
 import * as THREE from 'three';
 import Physijs from './vendors/physijs/physi';
+import { createjs } from './vendors/createjs/tweenjs';
+import ColorPlugin from './vendors/createjs/ColorPlugin';
 
 import { generateTile, glow } from './utils';
 
 Physijs.scripts.worker = require('./vendors/physijs/physijs_worker.js');
 Physijs.scripts.ammo = require('ammo.js');
 
+ColorPlugin.install(createjs);
+
 export default class ThreeAudioVisualization {
     _scene;
     _camera;
     _renderer;
     _active;
+    _simulating = false;
     _tiles = [
                           null, null,
                           null, null, null,
@@ -24,10 +29,14 @@ export default class ThreeAudioVisualization {
         null, null, null, null,
               null, null
     ];
+    _tween = {
+        tiles: []
+    };
+    _color;
 
     init(width, height) {
         this._scene = new Physijs.Scene();
-        this._scene.setGravity(new THREE.Vector3( 0, 0, 0 ));
+        // this._scene.setGravity(new THREE.Vector3( 0, 0, 0 ));
         this._camera = new THREE.PerspectiveCamera(45, width / height, .1, 1000);
         this._renderer = new THREE.WebGLRenderer();
 
@@ -59,12 +68,15 @@ export default class ThreeAudioVisualization {
             ];
 
         tilePositions.forEach((position, index) => {
-            const tile = generateTile();
+            const tile = generateTile({ color: new THREE.Color('#2eade8') });
 
             tile.position.set(...position);
             glow(tile);
             this._scene.add(tile);
-            this._tiles[index] = tile;
+            this._tiles[index] = {
+                color: new THREE.Color('#2eade8'),
+                object: tile
+            };
         });
     }
 
@@ -81,10 +93,81 @@ export default class ThreeAudioVisualization {
             }
 
             this._renderer.render(this._scene, this._camera);
-            this._scene.simulate();
+
+            if (this._simulating) {
+                this._scene.simulate();
+            }
         };
 
         requestAnimationFrame(render);
     }
 
+    shakeTile(index, { rotationX = -Math.PI / 5, rotationY = Math.PI / 5, rotationZ = 0, color } = {}) {
+        if (color && !/^#/.test(color)) {
+            color = '#' + new THREE.Color(color).getHex().toString(16);
+        }
+
+        const tile = this._tiles[index].object;
+
+        if (!this._tween.tiles[index]) {
+            this._tween.tiles[index] = {
+                rotationX: tile.rotation.x,
+                rotationY: tile.rotation.y,
+                rotationZ: tile.rotation.z,
+                color: '#' + this._tiles[index].color.getHex().toString(16)
+            }
+        }
+
+        let tween = this._tween.tiles[index];
+
+        createjs.Tween.get(tween, { override: true })
+            .to({
+                rotationX: rotationX,
+                rotationY: rotationY,
+                rotationZ: rotationZ,
+                color: color || ('#' + this._tiles[index].color.getHex().toString(16))
+            }, 300, createjs.Ease.circOut)
+            .to({
+                rotationX: 0,
+                rotationY: 0,
+                rotationZ: 0,
+                color: '#' + this._tiles[index].color.getHex().toString(16)
+            }, 3600, createjs.Ease.getElasticOut(1.8, .2))
+            .addEventListener('change', event => {
+                const tween = event.target.target;
+
+                tile.rotation.set(tween.rotationX, tween.rotationY, tween.rotationZ);
+                tile.material.color.set(new THREE.Color(tween.color));
+            });
+    }
+
+    wave({ x = -100, y = -100, z = 0, speed = .1, power = 1, type = 'shake', color } = {}) {
+        this._tiles.forEach((_tile, index) => {
+            const tile = _tile,
+                waveSourcePosition = new THREE.Vector3(x, y, z);
+
+            const rotation = [];
+
+            rotation[0] = x - tile.position.x && Math.PI / 2 * power / (x - tile.position.x);
+            rotation[1] = tile.position.y - y && Math.PI / 2 * power / (tile.position.y - y);
+            rotation[2] = tile.position.z - z && Math.PI / 2 * power / (tile.position.z - z);
+
+            rotation.forEach(component => {
+                if (component > Math.PI / 2) {
+                    component = Math.Pi / 2;
+                }
+            });
+
+            setTimeout(() => {
+                if (type === 'shake') {
+                    this.shakeTile(index, {
+                        rotationX: rotation[0],
+                        rotationY: rotation[1],
+                        rotationZ: rotation[2],
+                        color
+                    });
+                }
+            }, tile.position.distanceTo(waveSourcePosition) / speed);
+        });
+    }
 }

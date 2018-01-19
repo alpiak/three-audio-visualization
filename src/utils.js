@@ -17,11 +17,11 @@ const model = [
         ]
     ],
 
-    generateTile = () => {
+    generateTile = ({ color } = {}) => {
         const geometry = new THREE.ConvexGeometry(model[0].map(vertex => new THREE.Vector3(vertex[0], vertex[1], vertex[2]))),
             material = new THREE.MeshPhongMaterial({
                 emissive: 0x071c25,
-                color: 0x2eade8,
+                color: color,
                 specular: 0x222222,
                 shininess: 60,
                 opacity: .8,
