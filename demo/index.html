@@ -6,6 +6,7 @@
 		<style>
 			body {
 				margin: 0;
+				background-color: #000;
 			}
 
 			.tool-bar {
@@ -14,18 +15,32 @@
 				right: 0;
 				width: 310px;
 			}
+
+			input {
+				width: 100px;
+			}
 		</style>
 	</head>
 	<body>
 		<div class="tool-bar">
 			<div id="tool-bar__tile-animation">
-				<select>
+				<select class="type">
 					<option value="shake">Shake</option>
+					<option value="rollover">Roll Over</option>
+				</select>
+				<select class="direction">
+					<option value="vertical">Vertical</option>
+					<option value="horizontal">Horizontal</option>
+					<option value="cross">Cross</option>
 				</select>
 				<input placeholder="Tile Id">
 				<button>Animate</button>
 			</div>
 			<div id="tool-bar__tiles-animation">
+				<select class="type">
+					<option value="shake">Shake</option>
+					<option value="rollover">Roll Over</option>
+				</select>
 				<input value="-100" class="x" placeholder="">
 				<input value="-100" class="y" placeholder="Y">
 				<input value="0" class="z" placeholder="Z">

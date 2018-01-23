@@ -42,11 +42,11 @@ const model = [
 
         const insideUniforms	= glowMesh.insideMesh.material.uniforms;
 
-        insideUniforms.glowColor.value.set(0xc8eeff);
+        insideUniforms.glowColor.value.set(0xeeeeee);
 
         const outsideUniforms	= glowMesh.outsideMesh.material.uniforms;
 
-        outsideUniforms.glowColor.value.set(0xc8eeff);
+        outsideUniforms.glowColor.value.set(0xeeeeee);
         // outsideUniforms.coeficient.value = .1;
         // outsideUniforms.power.value = 1.2;
     };

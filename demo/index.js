@@ -13,11 +13,16 @@ threeAudioVisualization.start();
 const tileAnimationToolBar = document.querySelector('#tool-bar__tile-animation');
 
 tileAnimationToolBar.querySelector('button').addEventListener('click', () => {
-    const type = tileAnimationToolBar.querySelector('select').value;
+    const type = tileAnimationToolBar.querySelector('.type').value;
 
     switch (type) {
         case 'shake':
             threeAudioVisualization.shakeTile(tileAnimationToolBar.querySelector('input').value);
+            break;
+        case 'rollover':
+            threeAudioVisualization.rollOverTile(tileAnimationToolBar.querySelector('input').value, {
+                direction: tileAnimationToolBar.querySelector('.direction').value
+            });
             break;
     }
 });
@@ -25,8 +30,8 @@ tileAnimationToolBar.querySelector('button').addEventListener('click', () => {
 const tilesAnimationToolBar = document.querySelector('#tool-bar__tiles-animation');
 
 tilesAnimationToolBar.querySelector('.wave').addEventListener('click', () => {
-    threeAudioVisualization.wave({
-        type: 'shake',
+    threeAudioVisualization.waveTiles({
+        type: tilesAnimationToolBar.querySelector('.type').value,
         x: +tilesAnimationToolBar.querySelector('.x').value,
         y: +tilesAnimationToolBar.querySelector('.y').value,
         z: +tilesAnimationToolBar.querySelector('.z').value,
@@ -35,3 +40,24 @@ tilesAnimationToolBar.querySelector('.wave').addEventListener('click', () => {
         color: tilesAnimationToolBar.querySelector('.color').value || undefined
     });
 });
+
+const moveLight = () => {
+    threeAudioVisualization.moveLight({
+        x: -100 + 200 * Math.random(),
+        y: 100 + 200 * Math.random(),
+        z: 100,
+        duration: 10000
+    });
+
+    setTimeout(() => {
+        threeAudioVisualization.moveLight({
+            x: -100 + 200 * Math.random(),
+            y: 100 + 200 * Math.random(),
+            z: 100,
+            duration: 10000
+        });
+    }, 10000);
+};
+
+moveLight();
+setInterval(moveLight, 20000);
