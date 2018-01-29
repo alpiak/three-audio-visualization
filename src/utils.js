@@ -19,20 +19,35 @@ const model = [
 
     generateTile = ({ color } = {}) => {
         const geometry = new THREE.ConvexGeometry(model[0].map(vertex => new THREE.Vector3(vertex[0], vertex[1], vertex[2]))),
-            material = new THREE.MeshPhongMaterial({
-                emissive: 0x071c25,
-                color: color,
-                specular: 0x222222,
-                shininess: 60,
-                opacity: .8,
-                transparent: true
-            }),
+            material = Physijs.createMaterial(
+                new THREE.MeshPhongMaterial({
+                    emissive: color,
+                    color: color,
+                    specular: 0x222222,
+                    shininess: 60,
+                    opacity: .8,
+                    transparent: true
+                }),
+            1, 1.1),
             mesh = new Physijs.ConvexMesh(geometry, material),
             frame = new THREE.EdgesHelper(mesh, 0x888888);
 
         mesh.add(frame);
 
         return mesh;
+    },
+
+    generatePlane = ({ width, height, opacity = 1, restitution = .6, texture } = { restitution: .5, opacity: 1 }) => {
+        const geometry = new THREE.PlaneGeometry(width, height, 1, 1),
+            material = Physijs.createMaterial(
+                new THREE.MeshLambertMaterial({
+                    map: texture || null,
+                    opacity: opacity,
+                    transparent: true
+                }),
+            .9, restitution);
+
+        return new Physijs.PlaneMesh(geometry, material, 0);
     },
 
     glow = (mesh) => {
@@ -51,4 +66,4 @@ const model = [
         // outsideUniforms.power.value = 1.2;
     };
 
-export { generateTile, glow };
+export { generateTile, generatePlane, glow };
