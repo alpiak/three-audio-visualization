@@ -41,6 +41,13 @@ tilesAnimationToolBar.querySelector('.wave').addEventListener('click', () => {
     });
 });
 
+
+const layoutAnimationToolBar = document.querySelector('#tool-bar__layout-animation');
+
+layoutAnimationToolBar.querySelector('.switch').addEventListener('click', () => {
+    threeAudioVisualization.switchLayout(layoutAnimationToolBar.querySelector('.type').value);
+});
+
 const moveLight = () => {
     threeAudioVisualization.moveLight({
         x: -100 + 200 * Math.random(),
