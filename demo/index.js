@@ -17,13 +17,15 @@ tileAnimationToolBar.querySelector('button').addEventListener('click', () => {
 
     switch (type) {
         case 'shake':
-            threeAudioVisualization.shakeTile(tileAnimationToolBar.querySelector('input').value);
+            threeAudioVisualization.shakeTile(tileAnimationToolBar.querySelector('.id').value);
             break;
         case 'rollover':
-            threeAudioVisualization.rollOverTile(tileAnimationToolBar.querySelector('input').value, {
+            threeAudioVisualization.rollOverTile(tileAnimationToolBar.querySelector('.id').value, {
                 direction: tileAnimationToolBar.querySelector('.direction').value
             });
             break;
+        case 'float':
+            threeAudioVisualization.floatTile(tileAnimationToolBar.querySelector('.id').value, 50);
     }
 });
 
@@ -41,6 +43,13 @@ tilesAnimationToolBar.querySelector('.wave').addEventListener('click', () => {
     });
 });
 
+tilesAnimationToolBar.querySelector('.float-start').addEventListener('click', () => {
+    threeAudioVisualization.startFloatingTiles(50);
+});
+
+tilesAnimationToolBar.querySelector('.float-stop').addEventListener('click', () => {
+    threeAudioVisualization.stopFloatingTiles();
+});
 
 const layoutAnimationToolBar = document.querySelector('#tool-bar__layout-animation');
 

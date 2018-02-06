@@ -25,6 +25,7 @@ export default class ThreeAudioVisualization {
     _tween = {
         tiles0: [],
         tiles1: [],
+        tiles2: [],
         spotLight: null
     };
     _color;
@@ -120,21 +121,15 @@ export default class ThreeAudioVisualization {
 
         if (!this._tween.tiles0[index]) {
             this._tween.tiles0[index] = createjs.Tween.get({
-                x: tile.position.x,
-                y: tile.position.y,
-                z: tile.position.z,
                 rotationX: tile.rotation.x,
                 rotationY: tile.rotation.y,
                 rotationZ: tile.rotation.z,
                 color: tileItem.color,
-                opacity: tile.material.opacity
-            }, { override: true });
+            });
 
             this._tween.tiles0[index].addEventListener('change', () => {
-                tile.position.set(tween.target.x, tween.target.y, tween.target.z);
                 tile.rotation.set(tween.target.rotationX, tween.target.rotationY, tween.target.rotationZ);
                 tile.material.color.set(new THREE.Color(tween.target.color.replace(/-[0-9]+,/g, '0,')));
-                tile.material.opacity = tween.target.opacity;
             });
         }
 
@@ -188,21 +183,15 @@ export default class ThreeAudioVisualization {
 
         if (!this._tween.tiles0[index]) {
             this._tween.tiles0[index] = createjs.Tween.get({
-                x: tile.position.x,
-                y: tile.position.y,
-                z: tile.position.z,
                 rotationX: tile.rotation.x,
                 rotationY: tile.rotation.y,
                 rotationZ: tile.rotation.z,
                 color: tileItem.color,
-                opacity: tile.material.opacity
-            }, { override: true });
+            });
 
             this._tween.tiles0[index].addEventListener('change', () => {
-                tile.position.set(tween.target.x, tween.target.y, tween.target.z);
                 tile.rotation.set(tween.target.rotationX, tween.target.rotationY, tween.target.rotationZ);
                 tile.material.color.set(new THREE.Color(tween.target.color.replace(/-[0-9]+,/g, '0,')));
-                tile.material.opacity = tween.target.opacity;
             });
         }
 
@@ -246,6 +235,79 @@ export default class ThreeAudioVisualization {
         }
 
         tween.to(target, 1000, createjs.Ease.circInOut)
+            .setPaused(false);
+    }
+
+    floatTile(index, offset, { color } = {}, callback) {
+        if (color && !/^#/.test(color)) {
+            color = '#' + new THREE.Color(color).getHex().toString(16);
+        }
+
+        const tileItem = this._tiles[index],
+            tile = tileItem.object;
+
+        if (!this._tween.tiles1[index]) {
+            this._tween.tiles1[index] = createjs.Tween.get({
+                color: tileItem.color,
+                floatOffset: 0
+            });
+
+            this._tween.tiles1[index].addEventListener('change', () => {
+                const target = this._tween.tiles1[index].target,
+                    target1 = this._tween.tiles2[index].target;
+
+                tile.position.set(target1.x, target1.y, target1.z + target.floatOffset);
+                tile.material.color.set(new THREE.Color(target.color.replace(/-[0-9]+,/g, '0,')));
+                tile.material.opacity = target1.opacity * .8;
+                tile.children[0].material.opacity = target1.opacity * .2;
+
+                if (target1.opacity < .5) {
+                    tile.children[1].visible = false;
+                }
+            });
+        }
+
+        if (!this._tween.tiles2[index]) {
+            this._tween.tiles2[index] = createjs.Tween.get({
+                x: tile.position.x,
+                y: tile.position.y,
+                z: tile.position.z,
+                opacity: 1
+            });
+
+            this._tween.tiles2[index].addEventListener('change', () => {
+                const target = this._tween.tiles1[index].target,
+                    target1 = this._tween.tiles2[index].target;
+
+                tile.position.set(target1.x, target1.y, target1.z + target.floatOffset);
+                tile.material.color.set(new THREE.Color(target.color.replace(/-[0-9]+,/g, '0,')));
+                tile.material.opacity = target1.opacity * .8;
+                tile.children[0].material.opacity = target1.opacity * .2;
+
+                if (target1.opacity < .5) {
+                    tile.children[1].visible = false;
+                }
+            });
+        }
+
+        const tween = this._tween.tiles1[index];
+
+        tween
+            .wait(3000 * Math.random())
+            .to({
+                floatOffset: offset,
+                color: color || this._tiles[index].color
+            }, 5000 + 5000 * Math.random(), createjs.Ease.quadInOut)
+            .wait(3000 * Math.random())
+            .to({
+                floatOffset: 0,
+                color: this._tiles[index].color
+            }, 5000 + 5000 * Math.random(), createjs.Ease.quadInOut)
+            .call(() => {
+                if (typeof callback === 'function') {
+                    callback();
+                }
+            })
             .setPaused(false);
     }
 
@@ -305,6 +367,28 @@ export default class ThreeAudioVisualization {
         });
     }
 
+    startFloatingTiles(offset, { color } = {}) {
+        this._tiles.forEach((tileItem, index) => {
+            tileItem.floating = true;
+
+            const animate = () => {
+                this.floatTile(index, offset, { color }, () => {
+                    if (tileItem.floating === true) {
+                        animate();
+                    }
+                });
+            };
+
+            animate();
+        });
+    }
+
+    stopFloatingTiles() {
+        this._tiles.forEach(tileItem => {
+           tileItem.floating = false;
+        });
+    }
+
     /**
      * Switch to another layout of tiles with animation.
      * @param {string|Array[]} [layout=musicNote] - The layout of tiles, can be a string for a build-in layout or an array of arrays for a custom layout.
@@ -320,7 +404,7 @@ export default class ThreeAudioVisualization {
             tilePositions = getLayout('musicNote');
         }
 
-        const fadeOutPosition = [0, 0, 600],
+        const fadeOutPosition = [0, 0, 300],
             lengthDiff = tilePositions.length - this._tiles.length;
 
         if (lengthDiff > 0) {
@@ -347,27 +431,51 @@ export default class ThreeAudioVisualization {
         this._tiles.forEach((tileItem, index) => {
             const tile = tileItem.object;
 
-            if (!this._tween.tiles0[index]) {
-                this._tween.tiles0[index] = createjs.Tween.get({
-                    x: tile.position.x,
-                    y: tile.position.y,
-                    z: tile.position.z,
-                    rotationX: tile.rotation.x,
-                    rotationY: tile.rotation.y,
-                    rotationZ: tile.rotation.z,
+            if (!this._tween.tiles1[index]) {
+                this._tween.tiles1[index] = createjs.Tween.get({
                     color: tileItem.color,
-                    opacity: tile.material.opacity
-                }, { override: true });
+                    floatOffset: 0
+                });
 
-                this._tween.tiles0[index].addEventListener('change', () => {
-                    tile.position.set(tween.target.x, tween.target.y, tween.target.z);
-                    tile.rotation.set(tween.target.rotationX, tween.target.rotationY, tween.target.rotationZ);
-                    tile.material.color.set(new THREE.Color(tween.target.color.replace(/-[0-9]+,/g, '0,')));
-                    tile.material.opacity = tween.target.opacity;
+                this._tween.tiles1[index].addEventListener('change', () => {
+                    const target = this._tween.tiles1[index].target,
+                        target1 = this._tween.tiles2[index].target;
+
+                    tile.position.set(target1.x, target1.y, target1.z + target.floatOffset);
+                    tile.material.color.set(new THREE.Color(target.color.replace(/-[0-9]+,/g, '0,')));
+                    tile.material.opacity = target1.opacity * .8;
+                    tile.children[0].material.opacity = target1.opacity * .2;
+
+                    if (target1.opacity < .5) {
+                        tile.children[1].visible = false;
+                    }
                 });
             }
 
-            const tween = this._tween.tiles0[index];
+            if (!this._tween.tiles2[index]) {
+                this._tween.tiles2[index] = createjs.Tween.get({
+                    x: tile.position.x,
+                    y: tile.position.y,
+                    z: tile.position.z,
+                    opacity: 1
+                });
+
+                this._tween.tiles2[index].addEventListener('change', () => {
+                    const target = this._tween.tiles1[index].target,
+                        target1 = this._tween.tiles2[index].target;
+
+                    tile.position.set(target1.x, target1.y, target1.z + target.floatOffset);
+                    tile.material.color.set(new THREE.Color(target.color.replace(/-[0-9]+,/g, '0,')));
+                    tile.material.opacity = target1.opacity * .8;
+                    tile.children[0].material.opacity = target1.opacity * .2;
+
+                    if (target1.opacity < .5) {
+                        tile.children[1].visible = false;
+                    }
+                });
+            }
+
+            const tween = this._tween.tiles2[index];
 
             if (index < tilePositions.length) {
                 tween
