@@ -7,6 +7,8 @@ import Physijs from './vendors/physijs/physi';
 import './vendors/three/ConvexGeometry';
 import * as THREEx from './vendors/threex.geometricglow/threex';
 
+import { musicNote, play } from './layouts';
+
 const model = [
         [
             [-10, -10, -2], [-10, 10, -2], [10, 10, -2], [10, -10, -2],
@@ -20,7 +22,7 @@ const model = [
     generateTile = ({ color } = {}) => {
         const geometry = new THREE.ConvexGeometry(model[0].map(vertex => new THREE.Vector3(vertex[0], vertex[1], vertex[2]))),
             material = new THREE.MeshPhongMaterial({
-                emissive: 0x071c25,
+                emissive: color,
                 color: color,
                 specular: 0x222222,
                 shininess: 60,
@@ -28,27 +30,41 @@ const model = [
                 transparent: true
             }),
             mesh = new Physijs.ConvexMesh(geometry, material),
-            frame = new THREE.EdgesHelper(mesh, 0x888888);
+            frame = new THREE.EdgesHelper(mesh, 0xffffff);
+
+        frame.material.opacity = .2;
+        frame.material.transparent = true;
 
         mesh.add(frame);
 
         return mesh;
     },
 
-    glow = (mesh) => {
+    glow = mesh => {
         const glowMesh = new THREEx.GeometricGlowMesh(mesh);
 
         mesh.add(glowMesh.object3d);
 
         const insideUniforms	= glowMesh.insideMesh.material.uniforms;
 
-        insideUniforms.glowColor.value.set(0xc8eeff);
+        insideUniforms.glowColor.value.set(0xeeeeee);
 
         const outsideUniforms	= glowMesh.outsideMesh.material.uniforms;
 
-        outsideUniforms.glowColor.value.set(0xc8eeff);
+        outsideUniforms.glowColor.value.set(0xeeeeee);
         // outsideUniforms.coeficient.value = .1;
         // outsideUniforms.power.value = 1.2;
+    },
+
+    getLayout = layoutType => {
+        switch (layoutType) {
+            case 'musicNote':
+                return musicNote;
+            case 'play':
+                return play;
+            default:
+                return musicNote;
+        }
     };
 
-export { generateTile, glow };
+export { generateTile, glow, getLayout };
