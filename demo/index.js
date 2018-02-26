@@ -10,6 +10,7 @@ threeAudioVisualization.init(window.innerWidth, window.innerHeight, {
     accentColor: '#fff',
     accentIndices: [6]
 });
+
 threeAudioVisualization.mount(document.body);
 threeAudioVisualization.start();
 
