@@ -26,6 +26,7 @@ module.exports = {
         loaders: [
             {
                 test: /\.js$/,
+                exclude: /node_modules/,
                 loader: 'babel-loader'
             },
             {
@@ -34,6 +35,11 @@ module.exports = {
                     path.resolve(rootDir, 'node_modules', 'ammo.js')
                 ],
                 loader: 'url-loader?limit=8192'
+            },
+            {
+                test: /\.png$/,
+                exclude: /node_modules/,
+                loader: "url-loader?limit=8192"
             },
             {
                 test: /\.json$/,

@@ -8,7 +8,7 @@ const threeAudioVisualization = new ThreeAudioVisualization;
 
 threeAudioVisualization.init(window.innerWidth, window.innerHeight, {
     accentColor: '#fff',
-    accentIndices: [8]
+    accentIndices: [6]
 });
 threeAudioVisualization.mount(document.body);
 threeAudioVisualization.start();
@@ -80,3 +80,9 @@ const moveLight = () => {
 
 moveLight();
 setInterval(moveLight, 20000);
+
+const generalToolBar = document.querySelector('#tool-bar__general');
+
+generalToolBar.querySelector('.mode_physics').addEventListener('click', () => {
+    threeAudioVisualization.switchMode('physics');
+});

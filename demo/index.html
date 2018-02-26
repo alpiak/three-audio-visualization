@@ -2,13 +2,12 @@
 
 <html>
 	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 		<title></title>
 		<style>
 			body {
 				margin: 0;
 				background-color: #000;
-<<<<<<< HEAD
-=======
 			}
 
 			.tool-bar {
@@ -20,7 +19,17 @@
 
 			input {
 				width: 100px;
->>>>>>> animation
+			}
+
+			.tool-bar {
+				position: absolute;
+				top: 0;
+				right: 0;
+				width: 310px;
+			}
+
+			input {
+				width: 100px;
 			}
 		</style>
 	</head>
@@ -65,6 +74,8 @@
 					<option value="play">Play</option>
 				</select>
 				<button class="switch">Switch layout</button>
+			<div id="tool-bar__general">
+				<button class="mode_physics">Enter physics mode</button>
 			</div>
 		</div>
 	</body>
