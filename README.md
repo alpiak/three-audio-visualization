@@ -4,20 +4,18 @@ A three.js application with customizable animation and audio visualization featu
 
 ## Install
 
-`npm install three-audio-visualization`
+    npm install three-audio-visualization
 
 ## Usage
 
-`
-import ThreeAudioVisualization from 'three-audio-visualization';
+    import ThreeAudioVisualization from 'three-audio-visualization';
 
-const threeAudioVisualization = new ThreeAudioVisualization;
+    const threeAudioVisualization = new ThreeAudioVisualization;
 
-threeAudioVisualization.init(window.innerWidth, window.innerHeight, {
-    accentColor: '#fff',
-    accentIndices: [8]
-});
+    threeAudioVisualization.init(window.innerWidth, window.innerHeight, {
+        accentColor: '#fff',
+        accentIndices: [8]
+    });
 
-threeAudioVisualization.mount(document.body);
-threeAudioVisualization.start();
-`
+    threeAudioVisualization.mount(document.body);
+    threeAudioVisualization.start();

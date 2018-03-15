@@ -36,13 +36,13 @@ export default class ThreeAudioVisualization {
 
         /**
          * Init the scene.
-         * @param {Number} width
-         * @param {Number} height
+         * @param {number} width
+         * @param {number} height
          * @param {Object] [options] - Options.
-         * @param {String|Array[]} options.layout
-         * @param {String} options.primaryColor
-         * @param {String} options.accentColor
-         * @param {Number[]} options.accentIndices
+         * @param {string|Array[]} options.layout
+         * @param {string} options.primaryColor
+         * @param {string} options.accentColor
+         * @param {number[]} options.accentIndices
          */
         init(width, height, { layout = 'musicNote', primaryColor = '#2eade8', accentColor, accentIndices }) {
         this._scene = new Physijs.Scene();
