@@ -46,7 +46,7 @@ export default class ThreeAudioVisualization {
          */
         init(width, height, { layout = 'musicNote', primaryColor = '#2eade8', accentColor, accentIndices }) {
         this._scene = new Physijs.Scene();
-        this._scene.setGravity(new THREE.Vector3( 0, -300, 0 ));
+        this._scene.setGravity(new THREE.Vector3( 0, -600, 0 ));
         this._camera = new THREE.PerspectiveCamera(45, width / height, .1, 1000);
         this._renderer = new THREE.WebGLRenderer({ alpha: true });
 
@@ -640,43 +640,65 @@ export default class ThreeAudioVisualization {
     }
 
     switchMode(mode) {
+        const vector = new THREE.Vector3;
+
         switch (mode) {
             case 'physics':
-                this._tiles.forEach(tileItem => {
-                    tileItem.object.__dirtyPosition = true;
-                    tileItem.object.__dirtyRotation = true;
+                vector.set(0, 0, 0);
+
+                this._tiles.forEach(({ object }) => {
+                    object.__dirtyPosition = true;
+                    object.__dirtyRotation = true;
+                    object.setAngularFactor( vector );
+                    object.setAngularVelocity( vector );
+                    object.setLinearFactor( vector );
+                    object.setLinearVelocity( vector );
                 });
 
-                this._tween.camera
-                    .to({
-                        lookAtX: this._ground.position.x,
-                        lookAtY: this._ground.position.y + 60,
-                        lookAtZ: this._ground.position.z
-                    }, 5000, createjs.Ease.quartInOut)
-                    .setPaused(false);
-
-                this._tween.ground
-                    .to({
-                        opacity: 1
-                    }, 5000, createjs.Ease.quartInOut)
-                    .setPaused(false);
-
                 this._simulating = true;
+                vector.set(1, 1, 1);
 
-                this._tween.spotLight
-                    .to({
-                        x: 0,
-                        y: 0,
-                        z: 0,
-                        intensity: 2
-                    }, 3000, createjs.Ease.quartInOut)
-                    .setPaused(false);
+                const randomTile = this._tiles[Math.floor(this._tiles.length * Math.random())];
 
-                this._spotLight.target = this._ground;
+                this._tiles.forEach(({ object }) => {
+                    setTimeout(() => {
+                        object.setAngularFactor( vector );
+                        object.setLinearFactor( vector );
+                    }, object.position.distanceTo(randomTile.object.position) * 10);
+                });
+
+                setTimeout(() => {
+                    this._tween.camera
+                        .to({
+                            lookAtX: this._ground.position.x,
+                            lookAtY: this._ground.position.y + 60,
+                            lookAtZ: this._ground.position.z
+                        }, 3000, createjs.Ease.quartInOut)
+                        .setPaused(false);
+
+                    this._tween.ground
+                        .to({
+                            opacity: 1
+                        }, 3000, createjs.Ease.quartInOut)
+                        .setPaused(false);
+
+                    this._tween.spotLight
+                        .to({
+                            x: 0,
+                            y: 0,
+                            z: 0,
+                            intensity: 2
+                        }, 3000, createjs.Ease.quartInOut)
+                        .setPaused(false);
+
+                    this._spotLight.target = this._ground;
+                }, 800);
 
                 break;
+
             case 'basic':
                 this._simulating = false;
+
                 break;
         }
     }

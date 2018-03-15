@@ -19,7 +19,7 @@ const model = [
         ]
     ],
 
-    generateTile = ({ color } = {}) => {
+    generateTile = ({ color, restitution = .95 } = {}) => {
         const geometry = new THREE.ConvexGeometry(model[0].map(vertex => new THREE.Vector3(vertex[0], vertex[1], vertex[2]))),
             material = Physijs.createMaterial(
                 new THREE.MeshPhongMaterial({
@@ -30,7 +30,7 @@ const model = [
                     opacity: .8,
                     transparent: true
                 }),
-            1, 1.1),
+            1, restitution),
             mesh = new Physijs.ConvexMesh(geometry, material),
             frame = new THREE.EdgesHelper(mesh, 0xffffff);
 
@@ -41,7 +41,8 @@ const model = [
 
         return mesh;
     },
-    generatePlane = ({ width, height, opacity = 1, restitution = .6, texture } = { restitution: .5, opacity: 1 }) => {
+
+    generatePlane = ({ width, height, opacity = 1, restitution = .8, texture } = {}) => {
         const geometry = new THREE.PlaneGeometry(width, height, 1, 1),
             material = Physijs.createMaterial(
                 new THREE.MeshLambertMaterial({
