@@ -87,3 +87,5 @@ const generalToolBar = document.querySelector('#tool-bar__general');
 generalToolBar.querySelector('.mode_physics').addEventListener('click', () => {
     threeAudioVisualization.switchMode('physics');
 });
+
+threeAudioVisualization.enableReactiveCamera();

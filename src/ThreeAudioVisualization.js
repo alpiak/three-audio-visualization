@@ -18,6 +18,7 @@ ColorPlugin.install(createjs);
 export default class ThreeAudioVisualization {
     _scene;
     _camera;
+    _cameraLookAtPosition;
     _renderer;
     _spotLight;
     _active;
@@ -34,17 +35,17 @@ export default class ThreeAudioVisualization {
     };
     _color;
 
-        /**
-         * Init the scene.
-         * @param {number} width
-         * @param {number} height
-         * @param {Object] [options] - Options.
-         * @param {string|Array[]} options.layout
-         * @param {string} options.primaryColor
-         * @param {string} options.accentColor
-         * @param {number[]} options.accentIndices
-         */
-        init(width, height, { layout = 'musicNote', primaryColor = '#2eade8', accentColor, accentIndices }) {
+    /**
+     * Init the scene.
+     * @param {number} width
+     * @param {number} height
+     * @param {Object] [options] - Options.
+     * @param {string|Array[]} options.layout
+     * @param {string} options.primaryColor
+     * @param {string} options.accentColor
+     * @param {number[]} options.accentIndices
+     */
+    init(width, height, { layout = 'musicNote', primaryColor = '#2eade8', accentColor, accentIndices }) {
         this._scene = new Physijs.Scene();
         this._scene.setGravity(new THREE.Vector3( 0, -300, 0 ));
         this._camera = new THREE.PerspectiveCamera(45, width / height, .1, 1000);
@@ -78,17 +79,20 @@ export default class ThreeAudioVisualization {
         this._scene.add(this._spotLight);
 
         this._camera.position.set(0, 0, 500);
-        this._camera.lookAt(this._scene.position);
+        this._cameraLookAtPosition = new THREE.Vector3(this._scene.position.x, this._scene.position.y, this._scene.position.z);
+        this._camera.lookAt(this._cameraLookAtPosition);
+
         this._tween.camera = createjs.Tween.get({
-            lookAtX: 0,
-            lookAtY: 0,
-            lookAtZ: 0
+            lookAtX: this._cameraLookAtPosition.x,
+            lookAtY: this._cameraLookAtPosition.y,
+            lookAtZ: this._cameraLookAtPosition.z
         }, { override: true });
 
         this._tween.camera.addEventListener('change', (event) => {
             const tween = event.target.target;
 
-            this._camera.lookAt(new THREE.Vector3(tween.lookAtX, tween.lookAtY, tween.lookAt));
+            this._cameraLookAtPosition.set(tween.lookAtX, tween.lookAtY, tween.lookAtZ);
+            this._camera.lookAt(this._cameraLookAtPosition);
         });
 
         let tilePositions;
@@ -117,7 +121,7 @@ export default class ThreeAudioVisualization {
             const tile = generateTile({ color });
 
             tile.position.set(...position);
-            glow(tile);
+            // glow(tile);
             tile.castShadow = true;
             this._scene.add(tile);
             this._tiles[index] = {
@@ -685,5 +689,17 @@ export default class ThreeAudioVisualization {
                 this._simulating = false;
                 break;
         }
+    }
+
+    enableReactiveCamera() {
+        document.addEventListener('mousemove', e => {
+            const ratioX = e.x / window.innerWidth,
+                ratioY = e.y / window.innerHeight,
+                radX = Math.PI / 5 * (ratioX - .5),
+                radY = Math.PI / 5 * (ratioY - .5);
+
+            this._camera.position.set(Math.sin(radX) * 500, Math.sin(radY) * 500 * -1, Math.cos(radX) * Math.cos(radY) * 500);
+            this._camera.lookAt(this._cameraLookAtPosition);
+        });
     }
 }
