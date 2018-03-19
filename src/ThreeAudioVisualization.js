@@ -44,6 +44,21 @@ export default class ThreeAudioVisualization {
 
         this._spotLight = new THREE.SpotLight(0x999999);
         this._spotLight.position.set(0, 200, 100);
+
+        this._tween.spotLight = createjs.Tween.get({
+            x: this._spotLight.position.x,
+            y: this._spotLight.position.y,
+            z: this._spotLight.position.z,
+            intensity: this._spotLight.intensity
+        }, { override: true });
+
+        this._tween.spotLight.addEventListener('change', (event) => {
+            const tween = event.target.target;
+
+            this._spotLight.position.set(tween.x, tween.y, tween.z);
+            this._spotLight.intensity = tween.intensity;
+        });
+
         this._scene.add(this._spotLight);
 
         this._camera.position.set(0, 0, 500);
@@ -234,7 +249,7 @@ export default class ThreeAudioVisualization {
                 break;
         }
 
-        tween.to(target, 1000, createjs.Ease.circInOut)
+        tween.to(target, 500, createjs.Ease.quadInOut)
             .setPaused(false);
     }
 
@@ -311,7 +326,7 @@ export default class ThreeAudioVisualization {
             .setPaused(false);
     }
 
-    waveTiles({ x = -100, y = -100, z = 0, speed = .1, power = 1, type = 'shake', color } = {}) {
+    waveTiles({ x = -100, y = -100, z = 0, speed = .1, power = 1, type = 'shake', type: { animationType, direction }, color } = {}) {
         this._tiles.forEach((_tile, index) => {
             const tile = _tile.object,
                 waveSourcePosition = new THREE.Vector3(x, y, z),
@@ -326,13 +341,19 @@ export default class ThreeAudioVisualization {
             rotation[2] = distanceZ && Math.PI / 2 * power / distanceZ;
 
             rotation.forEach(component => {
-                if (component > Math.PI / 2) {
-                    component = Math.Pi / 2;
-                }
+                component = Math.min(component, Math.Pi / 2);
             });
 
             setTimeout(() => {
-                switch (type) {
+                let _type;
+
+                if (animationType) {
+                    _type = animationType;
+                } else {
+                    _type = type;
+                }
+
+                switch (_type) {
                     case 'shake':
                         this.shakeTile(index, {
                             rotationX: rotation[0],
@@ -342,13 +363,15 @@ export default class ThreeAudioVisualization {
                         });
                         break;
                     case 'rollover':
-                        const direction = (() => {
-                            if (x === y) {
-                                return 'cross';
-                            }
+                        if (!direction) {
+                            direction = (() => {
+                                if (x === y) {
+                                    return 'cross';
+                                }
 
-                            return Math.abs(distanceX) < Math.abs(distanceY) ? 'vertical' : 'horizontal';
-                        })();
+                                return Math.abs(distanceX) < Math.abs(distanceY) ? 'vertical' : 'horizontal';
+                            })();
+                        }
 
                         this.rollOverTile(index, {
                             direction,
@@ -502,26 +525,12 @@ export default class ThreeAudioVisualization {
     moveLight({ x, y, z, duration } = {}) {
         const spotLight = this._spotLight;
 
-        if (!this._tween.spotLight) {
-            this._tween.spotLight = {
-                x: spotLight.position.x,
-                y: spotLight.position.y,
-                z: spotLight.position.z
-            }
-        }
-
-        const tween = this._tween.spotLight;
-
-        createjs.Tween.get(tween, { override: true })
+        this._tween.spotLight
             .to({
                 x: x || spotLight.position.x,
                 y: y || spotLight.position.y,
                 z: z || spotLight.position.z
             }, duration || 10000, createjs.Ease.circInOut)
-            .addEventListener('change', event => {
-                const tween = event.target.target;
-
-                spotLight.position.set(tween.x, tween.y, tween.z);
-            });
+            .setPaused(false);
     }
 }

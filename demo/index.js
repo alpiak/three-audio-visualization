@@ -33,7 +33,10 @@ const tilesAnimationToolBar = document.querySelector('#tool-bar__tiles-animation
 
 tilesAnimationToolBar.querySelector('.wave').addEventListener('click', () => {
     threeAudioVisualization.waveTiles({
-        type: tilesAnimationToolBar.querySelector('.type').value,
+        type: {
+            animationType: tilesAnimationToolBar.querySelector('.type').value,
+            direction: tilesAnimationToolBar.querySelector('.direction').value
+        },
         x: +tilesAnimationToolBar.querySelector('.x').value,
         y: +tilesAnimationToolBar.querySelector('.y').value,
         z: +tilesAnimationToolBar.querySelector('.z').value,
