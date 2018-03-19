@@ -53,6 +53,7 @@ export default class ThreeAudioVisualization {
         this._renderer.setSize(width, height);
         this._renderer.setClearAlpha(0);
         this._renderer.shadowMapEnabled = true;
+        this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
         // TODO: remove later
         this._scene.add(new THREE.AxesHelper(20));
@@ -649,10 +650,10 @@ export default class ThreeAudioVisualization {
                 this._tiles.forEach(({ object }) => {
                     object.__dirtyPosition = true;
                     object.__dirtyRotation = true;
-                    object.setAngularFactor( vector );
-                    object.setAngularVelocity( vector );
-                    object.setLinearFactor( vector );
-                    object.setLinearVelocity( vector );
+                    object.setAngularFactor(vector);
+                    object.setAngularVelocity(vector);
+                    object.setLinearFactor(vector);
+                    object.setLinearVelocity(vector);
                 });
 
                 this._simulating = true;
@@ -662,8 +663,8 @@ export default class ThreeAudioVisualization {
 
                 this._tiles.forEach(({ object }) => {
                     setTimeout(() => {
-                        object.setAngularFactor( vector );
-                        object.setLinearFactor( vector );
+                        object.setAngularFactor(vector);
+                        object.setLinearFactor(vector);
                     }, object.position.distanceTo(randomTile.object.position) * 10);
                 });
 
@@ -671,15 +672,15 @@ export default class ThreeAudioVisualization {
                     this._tween.camera
                         .to({
                             lookAtX: this._ground.position.x,
-                            lookAtY: this._ground.position.y + 60,
+                            lookAtY: this._ground.position.y + 80,
                             lookAtZ: this._ground.position.z
-                        }, 3000, createjs.Ease.quartInOut)
+                        }, 2800, createjs.Ease.quartInOut)
                         .setPaused(false);
 
                     this._tween.ground
                         .to({
                             opacity: 1
-                        }, 3000, createjs.Ease.quartInOut)
+                        }, 2800, createjs.Ease.quartInOut)
                         .setPaused(false);
 
                     this._tween.spotLight
@@ -688,11 +689,11 @@ export default class ThreeAudioVisualization {
                             y: 0,
                             z: 0,
                             intensity: 2
-                        }, 3000, createjs.Ease.quartInOut)
+                        }, 2800, createjs.Ease.quartInOut)
                         .setPaused(false);
 
                     this._spotLight.target = this._ground;
-                }, 800);
+                }, 900);
 
                 break;
 
@@ -701,5 +702,32 @@ export default class ThreeAudioVisualization {
 
                 break;
         }
+    }
+
+    applyForces(...forces) {
+        const _vec3 = new THREE.Vector3;
+
+        this._tiles.forEach(({ object }) => {
+            const groupSize = 100 / forces.length; // The radius range of a ring area.
+
+            _vec3.set(object.position.x, 0, object.position.z);
+
+            const distance = _vec3.distanceTo(this._scene.position); // Distance to the center.
+
+            for (let i = 0; i < forces.length; i++) {
+                if (distance < i * groupSize) {
+                    continue;
+                }
+
+                if (distance < (i + 1) * groupSize || i === forces.length - 1) {
+                    _vec3.set(0, forces[i], 0);
+
+                    if (object.position.y + object.geometry.boundingBox.min.y < -249) {
+                        object.applyCentralImpulse(_vec3);
+                    }
+                    break;
+                }
+            }
+        });
     }
 }

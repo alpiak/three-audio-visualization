@@ -2,6 +2,9 @@
  * Created by qhyang on 2018/1/15.
  */
 
+import { Howl } from 'howler';
+import Clubber from 'clubber';
+
 import ThreeAudioVisualization from '../src/ThreeAudioVisualization';
 
 const threeAudioVisualization = new ThreeAudioVisualization;
@@ -89,4 +92,77 @@ const generalToolBar = document.querySelector('#tool-bar__general');
 
 generalToolBar.querySelector('.mode_physics').addEventListener('click', () => {
     threeAudioVisualization.switchMode('physics');
+});
+
+const physicsToolBar = document.querySelector('#tool-bar__physics');
+
+physicsToolBar.querySelector('.apply-force').addEventListener('click', () => {
+   threeAudioVisualization.applyForces(...physicsToolBar.querySelector('.forces').value.split(',').map(force => +force));
+});
+
+let sound, clubber, active, bands = [];
+
+physicsToolBar.querySelector('.load-audio-source').addEventListener('click', async () => {
+    active = false;
+
+    await new Promise((resolve, reject) => {
+        if (this._sound) {
+            this._sound.unload();
+        }
+
+        sound = new Howl({
+            src: physicsToolBar.querySelector('.audio-source').value,
+            html5: true,
+            format: ['mp3']
+        });
+
+        sound.once('load', () => {
+            resolve();
+        });
+
+        sound.once('loaderror', (id, err) => {
+            reject(err);
+        });
+    });
+
+    clubber = new Clubber({
+        size: 2048,
+        mute: false
+    });
+
+    clubber.listen(sound._sounds[0]._node);
+
+    const bandWidth = +physicsToolBar.querySelector('.band-width').value;
+
+    for (let i = 0; i < 128 / bandWidth; i++) {
+        bands[i] = clubber.band({
+            template: '01234',
+            from: i * bandWidth,
+            to: i * bandWidth + bandWidth,
+            smooth: [0.1, 0.1, 0.1, 0.1, 0.1]
+        });
+    }
+
+    const render = () => {
+        clubber.update();
+
+        let data = [];
+
+        bands.forEach((band, index) => {
+            data[index] = new Array(5);
+            band(data[index]);
+            threeAudioVisualization.applyForces(...data.map(band => Math.sqrt(band[3] * 1000000000)));
+        });
+
+        if (active) {
+            requestAnimationFrame(render);
+        }
+    };
+
+    requestAnimationFrame(() => {
+        active = true;
+        render();
+    });
+
+    sound.play();
 });
