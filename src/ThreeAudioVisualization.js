@@ -510,7 +510,7 @@ export default class ThreeAudioVisualization {
      */
     switchLayout(layout = 'musicNote') {
         this._currentLayout = layout;
-        
+
         let tilePositions;
 
         if (typeof layout === 'string') {

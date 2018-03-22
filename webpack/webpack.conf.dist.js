@@ -4,9 +4,11 @@
 
 'use strict';
 
-const HtmlWebpack = require('html-webpack-plugin');
 const path = require('path');
-const webpack = require('webpack');
+
+const HtmlWebpack = require('html-webpack-plugin'),
+    webpack = require('webpack'),
+    UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const rootDir = path.resolve(__dirname, '..');
 
@@ -45,6 +47,7 @@ module.exports = {
             }
         ]
     },
+    plugins: [ new UglifyJSPlugin ],
     resolve: {
         extensions: [ '.js' ]
     }
