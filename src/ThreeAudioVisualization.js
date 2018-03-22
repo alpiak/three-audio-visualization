@@ -20,7 +20,6 @@ let _onMouseMove;
 export default class ThreeAudioVisualization {
     _scene;
     _camera;
-    _cameraLookAtPosition;
     _renderer;
     _spotLight;
     _active;
@@ -73,21 +72,11 @@ export default class ThreeAudioVisualization {
         this._scene.add(new THREE.SpotLightHelper(this._spotLight));
 
         this._camera.position.set(0, 0, 500);
-        this._cameraLookAtPosition = new THREE.Vector3(this._scene.position.x, this._scene.position.y, this._scene.position.z);
-        this._camera.lookAt(this._cameraLookAtPosition);
+        this._tween.camera = this._getCameraTween();
 
-        this._tween.camera = createjs.Tween.get({
-            lookAtX: this._cameraLookAtPosition.x,
-            lookAtY: this._cameraLookAtPosition.y,
-            lookAtZ: this._cameraLookAtPosition.z
-        }, { override: true });
+        const cameraTween = this._tween.camera.target;
 
-        this._tween.camera.addEventListener('change', (event) => {
-            const tween = event.target.target;
-
-            this._cameraLookAtPosition.set(tween.lookAtX, tween.lookAtY, tween.lookAtZ);
-            this._camera.lookAt(this._cameraLookAtPosition);
-        });
+        this._camera.lookAt(cameraTween.lookAtX, cameraTween.lookAtY, cameraTween.lookAtZ);
 
         let tilePositions;
 
@@ -812,7 +801,10 @@ export default class ThreeAudioVisualization {
                 radY = Math.PI / 5 * (ratioY - .5);
 
             this._camera.position.set(Math.sin(radX) * 500, Math.sin(radY) * 500 * -1, Math.cos(radX) * Math.cos(radY) * 500);
-            this._camera.lookAt(this._cameraLookAtPosition);
+
+            const tween = this._tween.camera.target;
+
+            this._camera.lookAt(tween.lookAtX, tween.lookAtY, tween.lookAtZ);
         };
 
         document.addEventListener('mousemove', _onMouseMove);
@@ -866,9 +858,9 @@ export default class ThreeAudioVisualization {
 
     _getCameraTween() {
         let target = {
-            lookAtX: 0,
-            lookAtY: 0,
-            lookAtZ: 0
+            lookAtX: this._scene.position.x,
+            lookAtY: this._scene.position.y,
+            lookAtZ: this._scene.position.z
         };
 
         if (this._tween.camera) {
@@ -881,12 +873,14 @@ export default class ThreeAudioVisualization {
             }
         }
 
-        const tween = createjs.Tween.get(target);
+        const tween = createjs.Tween.get(target),
+            _vec3 = new THREE.Vector3;
 
         tween.addEventListener('change', (event) => {
             const tween = event.target.target;
 
-            this._camera.lookAt(new THREE.Vector3(tween.lookAtX, tween.lookAtY, tween.lookAt));
+            _vec3.set(tween.lookAtX, tween.lookAtY, tween.lookAtZ);
+            this._camera.lookAt(_vec3);
         });
 
         return tween;
