@@ -15,6 +15,8 @@ Physijs.scripts.ammo = require('ammo.js');
 
 ColorPlugin.install(createjs);
 
+let _onMouseMove;
+
 export default class ThreeAudioVisualization {
     _scene;
     _camera;
@@ -31,7 +33,8 @@ export default class ThreeAudioVisualization {
         tiles2: [],
         spotLight: null,
         camera: null,
-        ground: null
+        ground: null,
+        domElement: null
     };
     _color;
 
@@ -214,6 +217,8 @@ export default class ThreeAudioVisualization {
     }
 
     mount(root) {
+        this._renderer.domElement.style.display = 'none';
+        this._renderer.domElement.style.opacity = '0';
         root.appendChild(this._renderer.domElement);
     }
 
@@ -233,6 +238,12 @@ export default class ThreeAudioVisualization {
         };
 
         requestAnimationFrame(render);
+    }
+
+    pause() {
+        this._active = false;
+        this.disableReactiveCamera();
+        this.stopFloatingTiles();
     }
 
     shakeTile(index, { rotationX = -Math.PI / 5, rotationY = Math.PI / 5, rotationZ = 0, color } = {}) {
@@ -538,7 +549,7 @@ export default class ThreeAudioVisualization {
 
                 tile.position.set(...fadeOutPosition);
                 tile.material.opacity = 0;
-                glow(tile);
+                // glow(tile);
                 this._scene.add(tile);
                 this._tiles.push({
                     color,
@@ -692,7 +703,7 @@ export default class ThreeAudioVisualization {
     }
 
     enableReactiveCamera() {
-        document.addEventListener('mousemove', e => {
+        _onMouseMove = (e) => {
             const ratioX = e.x / window.innerWidth,
                 ratioY = e.y / window.innerHeight,
                 radX = Math.PI / 5 * (ratioX - .5),
@@ -700,6 +711,61 @@ export default class ThreeAudioVisualization {
 
             this._camera.position.set(Math.sin(radX) * 500, Math.sin(radY) * 500 * -1, Math.cos(radX) * Math.cos(radY) * 500);
             this._camera.lookAt(this._cameraLookAtPosition);
+        };
+
+        document.addEventListener('mousemove', _onMouseMove);
+    }
+
+    disableReactiveCamera() {
+        if (_onMouseMove) {
+            document.removeEventListener('mousemove', _onMouseMove);
+        }
+    }
+
+    show() {
+        createjs.Tween.removeAllTweens();
+
+        const tween = this._tween.domElement = this._getDomElementTween();
+
+        tween
+            .to({
+                opacity: 1
+            }, 300, createjs.Ease.quadInOut)
+    }
+
+    hide() {
+        createjs.Tween.removeAllTweens();
+
+        const tween = this._tween.domElement = this._getDomElementTween();
+
+        tween
+            .to({
+                opacity: 0
+            }, 300, createjs.Ease.quadInOut)
+    }
+    
+    _getDomElementTween() {
+        let opacity = 0;
+
+        if (this._tween.domElement) {
+            opacity = this._tween.domElement.target.opacity;
+        }
+
+        const tween = createjs.Tween.get({ opacity });
+
+        tween.addEventListener('change', event => {
+            const opacity = +event.target.target.opacity,
+                domElementStyle = this._renderer.domElement.style;
+
+            domElementStyle.opacity = opacity;
+
+            if (opacity === 0) {
+                domElementStyle.display = 'none';
+            } else if (domElementStyle.display === 'none') {
+                domElementStyle.display = 'block';
+            }
         });
+
+        return tween;
     }
 }

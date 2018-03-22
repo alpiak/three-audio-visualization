@@ -88,4 +88,13 @@ generalToolBar.querySelector('.mode_physics').addEventListener('click', () => {
     threeAudioVisualization.switchMode('physics');
 });
 
-threeAudioVisualization.enableReactiveCamera();
+generalToolBar.querySelector('.show').addEventListener('click', () => {
+    threeAudioVisualization.show();
+    threeAudioVisualization.start();
+    threeAudioVisualization.enableReactiveCamera();
+});
+
+generalToolBar.querySelector('.hide').addEventListener('click', () => {
+   threeAudioVisualization.hide();
+    threeAudioVisualization.pause();
+});

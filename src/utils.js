@@ -41,6 +41,7 @@ const model = [
 
         return mesh;
     },
+
     generatePlane = ({ width, height, opacity = 1, restitution = .6, texture } = { restitution: .5, opacity: 1 }) => {
         const geometry = new THREE.PlaneGeometry(width, height, 1, 1),
             material = Physijs.createMaterial(
