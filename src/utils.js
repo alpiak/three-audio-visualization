@@ -60,11 +60,11 @@ const model = [
 
         mesh.add(glowMesh.object3d);
 
-        const insideUniforms	= glowMesh.insideMesh.material.uniforms;
+        const insideUniforms = glowMesh.insideMesh.material.uniforms;
 
         insideUniforms.glowColor.value.set(0xeeeeee);
 
-        const outsideUniforms	= glowMesh.outsideMesh.material.uniforms;
+        const outsideUniforms = glowMesh.outsideMesh.material.uniforms;
 
         outsideUniforms.glowColor.value.set(0xeeeeee);
         // outsideUniforms.coeficient.value = .1;

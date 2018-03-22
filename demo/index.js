@@ -103,6 +103,17 @@ generalToolBar.querySelector('.mode_basic').addEventListener('click', () => {
     threeAudioVisualization.switchMode('basic');
 });
 
+generalToolBar.querySelector('.show').addEventListener('click', () => {
+    threeAudioVisualization.show();
+    threeAudioVisualization.start();
+    threeAudioVisualization.enableReactiveCamera();
+});
+
+generalToolBar.querySelector('.hide').addEventListener('click', () => {
+    threeAudioVisualization.hide();
+    threeAudioVisualization.pause();
+});
+
 const physicsToolBar = document.querySelector('#tool-bar__physics');
 
 physicsToolBar.querySelector('.apply-force').addEventListener('click', () => {

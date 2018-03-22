@@ -15,9 +15,12 @@ Physijs.scripts.ammo = require('ammo.js');
 
 ColorPlugin.install(createjs);
 
+let _onMouseMove;
+
 export default class ThreeAudioVisualization {
     _scene;
     _camera;
+    _cameraLookAtPosition;
     _renderer;
     _spotLight;
     _active;
@@ -30,7 +33,8 @@ export default class ThreeAudioVisualization {
         tiles2: [],
         spotLight: null,
         camera: null,
-        ground: null
+        ground: null,
+        domElement: null
     };
     _color;
 
@@ -69,7 +73,21 @@ export default class ThreeAudioVisualization {
         this._scene.add(new THREE.SpotLightHelper(this._spotLight));
 
         this._camera.position.set(0, 0, 500);
-        this._camera.lookAt(this._scene.position);
+        this._cameraLookAtPosition = new THREE.Vector3(this._scene.position.x, this._scene.position.y, this._scene.position.z);
+        this._camera.lookAt(this._cameraLookAtPosition);
+
+        this._tween.camera = createjs.Tween.get({
+            lookAtX: this._cameraLookAtPosition.x,
+            lookAtY: this._cameraLookAtPosition.y,
+            lookAtZ: this._cameraLookAtPosition.z
+        }, { override: true });
+
+        this._tween.camera.addEventListener('change', (event) => {
+            const tween = event.target.target;
+
+            this._cameraLookAtPosition.set(tween.lookAtX, tween.lookAtY, tween.lookAtZ);
+            this._camera.lookAt(this._cameraLookAtPosition);
+        });
 
         let tilePositions;
 
@@ -99,7 +117,7 @@ export default class ThreeAudioVisualization {
             const tile = generateTile({ color });
 
             tile.position.set(...position);
-            glow(tile);
+            // glow(tile);
             tile.castShadow = true;
             this._scene.add(tile);
             this._tiles[index] = {
@@ -182,6 +200,8 @@ export default class ThreeAudioVisualization {
     }
 
     mount(root) {
+        this._renderer.domElement.style.display = 'none';
+        this._renderer.domElement.style.opacity = '0';
         root.appendChild(this._renderer.domElement);
     }
 
@@ -201,6 +221,12 @@ export default class ThreeAudioVisualization {
         };
 
         requestAnimationFrame(render);
+    }
+
+    pause() {
+        this._active = false;
+        this.disableReactiveCamera();
+        this.stopFloatingTiles();
     }
 
     shakeTile(index, { rotationX = -Math.PI / 5, rotationY = Math.PI / 5, rotationZ = 0, color } = {}) {
@@ -516,7 +542,7 @@ export default class ThreeAudioVisualization {
 
                 tile.position.set(...fadeOutPosition);
                 tile.material.opacity = 0;
-                glow(tile);
+                // glow(tile);
                 this._scene.add(tile);
                 this._tiles.push({
                     color,
@@ -778,7 +804,49 @@ export default class ThreeAudioVisualization {
         });
     }
 
-     _getSpotLightTween() {
+    enableReactiveCamera() {
+        _onMouseMove = (e) => {
+            const ratioX = e.x / window.innerWidth,
+                ratioY = e.y / window.innerHeight,
+                radX = Math.PI / 5 * (ratioX - .5),
+                radY = Math.PI / 5 * (ratioY - .5);
+
+            this._camera.position.set(Math.sin(radX) * 500, Math.sin(radY) * 500 * -1, Math.cos(radX) * Math.cos(radY) * 500);
+            this._camera.lookAt(this._cameraLookAtPosition);
+        };
+
+        document.addEventListener('mousemove', _onMouseMove);
+    }
+
+    disableReactiveCamera() {
+        if (_onMouseMove) {
+            document.removeEventListener('mousemove', _onMouseMove);
+        }
+    }
+
+    show() {
+        createjs.Tween.removeAllTweens();
+
+        const tween = this._tween.domElement = this._getDomElementTween();
+
+        tween
+            .to({
+                opacity: 1
+            }, 300, createjs.Ease.quadInOut)
+    }
+
+    hide() {
+        createjs.Tween.removeAllTweens();
+
+        const tween = this._tween.domElement = this._getDomElementTween();
+
+        tween
+            .to({
+                opacity: 0
+            }, 300, createjs.Ease.quadInOut)
+    }
+
+    _getSpotLightTween() {
         const tween = createjs.Tween.get({
             x: this._spotLight.position.x,
             y: this._spotLight.position.y,
@@ -841,6 +909,31 @@ export default class ThreeAudioVisualization {
             const tween = event.target.target;
 
             this._ground.material.opacity = tween.opacity;
+        });
+
+        return tween;
+    }
+    
+    _getDomElementTween() {
+        let opacity = 0;
+
+        if (this._tween.domElement) {
+            opacity = this._tween.domElement.target.opacity;
+        }
+
+        const tween = createjs.Tween.get({ opacity });
+
+        tween.addEventListener('change', event => {
+            const opacity = +event.target.target.opacity,
+                domElementStyle = this._renderer.domElement.style;
+
+            domElementStyle.opacity = opacity;
+
+            if (opacity === 0) {
+                domElementStyle.display = 'none';
+            } else if (domElementStyle.display === 'none') {
+                domElementStyle.display = 'block';
+            }
         });
 
         return tween;
