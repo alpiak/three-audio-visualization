@@ -67,6 +67,8 @@ layoutAnimationToolBar.querySelector('.switch').addEventListener('click', () => 
     threeAudioVisualization.switchLayout(layoutAnimationToolBar.querySelector('.type').value);
 });
 
+let timeout;
+
 const moveLight = () => {
     threeAudioVisualization.moveLight({
         x: -100 + 200 * Math.random(),
@@ -75,7 +77,7 @@ const moveLight = () => {
         duration: 10000
     });
 
-    setTimeout(() => {
+    timeout = setTimeout(() => {
         threeAudioVisualization.moveLight({
             x: -100 + 200 * Math.random(),
             y: 100 + 200 * Math.random(),
@@ -86,12 +88,19 @@ const moveLight = () => {
 };
 
 moveLight();
-setInterval(moveLight, 20000);
+
+const interval = setInterval(moveLight, 20000);
 
 const generalToolBar = document.querySelector('#tool-bar__general');
 
 generalToolBar.querySelector('.mode_physics').addEventListener('click', () => {
+    clearInterval(interval);
+    clearTimeout(timeout);
     threeAudioVisualization.switchMode('physics');
+});
+
+generalToolBar.querySelector('.mode_basic').addEventListener('click', () => {
+    threeAudioVisualization.switchMode('basic');
 });
 
 const physicsToolBar = document.querySelector('#tool-bar__physics');

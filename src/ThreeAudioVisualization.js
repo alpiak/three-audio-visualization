@@ -34,17 +34,17 @@ export default class ThreeAudioVisualization {
     };
     _color;
 
-        /**
-         * Init the scene.
-         * @param {number} width
-         * @param {number} height
-         * @param {Object] [options] - Options.
-         * @param {string|Array[]} options.layout
-         * @param {string} options.primaryColor
-         * @param {string} options.accentColor
-         * @param {number[]} options.accentIndices
-         */
-        init(width, height, { layout = 'musicNote', primaryColor = '#2eade8', accentColor, accentIndices }) {
+    /**
+     * Init the scene.
+     * @param {number} width
+     * @param {number} height
+     * @param {Object} [options] - Options.
+     * @param {string|Array[]} options.layout
+     * @param {string} options.primaryColor
+     * @param {string} options.accentColor
+     * @param {number[]} options.accentIndices
+     */
+    init(width, height, { layout = 'musicNote', primaryColor = '#2eade8', accentColor, accentIndices } = {}) {
         this._scene = new Physijs.Scene();
         this._scene.setGravity(new THREE.Vector3( 0, -600, 0 ));
         this._camera = new THREE.PerspectiveCamera(45, width / height, .1, 1000);
@@ -60,39 +60,20 @@ export default class ThreeAudioVisualization {
 
         this._spotLight = new THREE.SpotLight(0x999999);
         this._spotLight.position.set(0, 200, 100);
+        this._spotLight.target = this._scene;
         this._spotLight.castShadow = true;
-
-        this._tween.spotLight = createjs.Tween.get({
-            x: this._spotLight.position.x,
-            y: this._spotLight.position.y,
-            z: this._spotLight.position.z,
-            intensity: this._spotLight.intensity
-        }, { override: true });
-
-        this._tween.spotLight.addEventListener('change', (event) => {
-            const tween = event.target.target;
-
-            this._spotLight.position.set(tween.x, tween.y, tween.z);
-            this._spotLight.intensity = tween.intensity;
-        });
-
+        this._tween.spotLight = this._getSpotLightTween();
         this._scene.add(this._spotLight);
+
+        // TODO: remove later
+        this._scene.add(new THREE.SpotLightHelper(this._spotLight));
 
         this._camera.position.set(0, 0, 500);
         this._camera.lookAt(this._scene.position);
-        this._tween.camera = createjs.Tween.get({
-            lookAtX: 0,
-            lookAtY: 0,
-            lookAtZ: 0
-        }, { override: true });
-
-        this._tween.camera.addEventListener('change', (event) => {
-            const tween = event.target.target;
-
-            this._camera.lookAt(new THREE.Vector3(tween.lookAtX, tween.lookAtY, tween.lookAt));
-        });
 
         let tilePositions;
+
+        this._currentLayout = layout;
 
         if (typeof layout === 'string') {
             tilePositions = getLayout(layout);
@@ -196,16 +177,6 @@ export default class ThreeAudioVisualization {
         this._ground.position.set(0, -250, 0);
         this._ground.rotation.set(Math.PI / -2, 0, 0);
         this._ground.receiveShadow = true;
-
-        this._tween.ground = createjs.Tween.get({
-            opacity: 0
-        }, { override: true });
-
-        this._tween.ground.addEventListener('change', (event) => {
-            const tween = event.target.target;
-
-            this._ground.material.opacity = tween.opacity;
-        });
 
         this._scene.add(this._ground);
     }
@@ -523,6 +494,8 @@ export default class ThreeAudioVisualization {
      * @param {string|Array[]} [layout=musicNote] - The layout of tiles, can be a string for a build-in layout or an array of arrays for a custom layout.
      */
     switchLayout(layout = 'musicNote') {
+        this._currentLayout = layout;
+        
         let tilePositions;
 
         if (typeof layout === 'string') {
@@ -559,6 +532,29 @@ export default class ThreeAudioVisualization {
 
         this._tiles.forEach((tileItem, index) => {
             const tile = tileItem.object;
+
+            if (!this._tween.tiles0[index]) {
+                this._tween.tiles0[index] = createjs.Tween.get({
+                    rotationX: tile.rotation.x,
+                    rotationY: tile.rotation.y,
+                    rotationZ: tile.rotation.z,
+                    color: tileItem.color
+                });
+
+                this._tween.tiles0[index].addEventListener('change', () => {
+                    const target = this._tween.tiles0[index].target;
+
+                    tile.rotation.set(target.rotationX, target.rotationY, target.rotationZ);
+                    tile.material.color.set(new THREE.Color(target.color.replace(/-[0-9]+,/g, '0,')));
+                });
+            } else {
+                this._tween.tiles0[index].to({
+                    rotationX: tile.rotation.x,
+                    rotationY: tile.rotation.y,
+                    rotationZ: tile.rotation.z,
+                    color: tileItem.color
+                }, 0);
+            }
 
             if (!this._tween.tiles1[index]) {
                 this._tween.tiles1[index] = createjs.Tween.get({
@@ -602,12 +598,29 @@ export default class ThreeAudioVisualization {
                         tile.children[1].visible = false;
                     }
                 });
+            } else {
+                this._tween.tiles2[index].to({
+                    x: tile.position.x,
+                    y: tile.position.y,
+                    z: tile.position.z - this._tween.tiles1[index].target.floatOffset,
+                    opacity: tile.material.opacity
+                }, 0);
             }
 
-            const tween = this._tween.tiles2[index];
+            const tween0 = this._tween.tiles0[index];
+
+            tween0
+                .to({
+                    rotationX: 0,
+                    rotationY: 0,
+                    rotationZ: 0
+                }, 1000, createjs.Ease.circInOut)
+                .setPaused(false);
+
+            const tween2 = this._tween.tiles2[index];
 
             if (index < tilePositions.length) {
-                tween
+                tween2
                     .to({
                         x: tilePositions[index][0],
                         y: tilePositions[index][1],
@@ -616,7 +629,7 @@ export default class ThreeAudioVisualization {
                     }, 1000, createjs.Ease.circInOut)
                     .setPaused(false);
             } else {
-                tween
+                tween2
                     .to({
                         x: fadeOutPosition[0],
                         y: fadeOutPosition[1],
@@ -641,31 +654,39 @@ export default class ThreeAudioVisualization {
     }
 
     switchMode(mode) {
-        const vector = new THREE.Vector3;
+        createjs.Tween.removeAllTweens();
+        this._tween.spotLight = this._getSpotLightTween();
+        this._tween.camera = this._getCameraTween();
+        this._tween.ground  = this._getGroundTween();
+
+        const _vec3 = new THREE.Vector3;
 
         switch (mode) {
             case 'physics':
-                vector.set(0, 0, 0);
-
-                this._tiles.forEach(({ object }) => {
-                    object.__dirtyPosition = true;
-                    object.__dirtyRotation = true;
-                    object.setAngularFactor(vector);
-                    object.setAngularVelocity(vector);
-                    object.setLinearFactor(vector);
-                    object.setLinearVelocity(vector);
-                });
-
                 this._simulating = true;
-                vector.set(1, 1, 1);
 
-                const randomTile = this._tiles[Math.floor(this._tiles.length * Math.random())];
+                requestAnimationFrame(() => {
+                    _vec3.set(0, 0, 0);
 
-                this._tiles.forEach(({ object }) => {
-                    setTimeout(() => {
-                        object.setAngularFactor(vector);
-                        object.setLinearFactor(vector);
-                    }, object.position.distanceTo(randomTile.object.position) * 10);
+                    this._tiles.forEach(({ object }) => {
+                        object.__dirtyPosition = true;
+                        object.__dirtyRotation = true;
+                        object.setAngularFactor(_vec3);
+                        object.setAngularVelocity(_vec3);
+                        object.setLinearFactor(_vec3);
+                        object.setLinearVelocity(_vec3);
+                    });
+
+                    const randomTile = this._tiles[Math.floor(this._tiles.length * Math.random())];
+
+                    _vec3.set(1, 1, 1);
+
+                    this._tiles.forEach(({ object }) => {
+                        setTimeout(() => {
+                            object.setAngularFactor(_vec3);
+                            object.setLinearFactor(_vec3);
+                        }, object.position.distanceTo(randomTile.object.position) * 8);
+                    });
                 });
 
                 setTimeout(() => {
@@ -699,6 +720,32 @@ export default class ThreeAudioVisualization {
 
             case 'basic':
                 this._simulating = false;
+                this.switchLayout(this._currentLayout);
+
+                this._tween.camera
+                    .to({
+                        lookAtX: this._scene.position.x,
+                        lookAtY: this._scene.position.y,
+                        lookAtZ: this._scene.position.z
+                    }, 1200, createjs.Ease.quartInOut)
+                    .setPaused(false);
+
+                this._tween.ground
+                    .to({
+                        opacity: 0
+                    }, 1200, createjs.Ease.quartInOut)
+                    .setPaused(false);
+
+                this._tween.spotLight
+                    .to({
+                        x: 0,
+                        y: 200,
+                        z: 100,
+                        intensity: 1
+                    }, 1200, createjs.Ease.quartInOut)
+                    .setPaused(false);
+
+                this._spotLight.target = this._scene;
 
                 break;
         }
@@ -729,5 +776,73 @@ export default class ThreeAudioVisualization {
                 }
             }
         });
+    }
+
+     _getSpotLightTween() {
+        const tween = createjs.Tween.get({
+            x: this._spotLight.position.x,
+            y: this._spotLight.position.y,
+            z: this._spotLight.position.z,
+            intensity: this._spotLight.intensity
+        });
+
+        tween.addEventListener('change', (event) => {
+            const tween = event.target.target;
+
+            this._spotLight.position.set(tween.x, tween.y, tween.z);
+            this._spotLight.intensity = tween.intensity;
+        });
+
+        return tween;
+    };
+
+    _getCameraTween() {
+        let target = {
+            lookAtX: 0,
+            lookAtY: 0,
+            lookAtZ: 0
+        };
+
+        if (this._tween.camera) {
+            const _target = this._tween.camera.target;
+
+            target = {
+                lookAtX: _target.lookAtX,
+                lookAtY: _target.lookAtY,
+                lookAtZ: _target.lookAtZ
+            }
+        }
+
+        const tween = createjs.Tween.get(target);
+
+        tween.addEventListener('change', (event) => {
+            const tween = event.target.target;
+
+            this._camera.lookAt(new THREE.Vector3(tween.lookAtX, tween.lookAtY, tween.lookAt));
+        });
+
+        return tween;
+    }
+
+    _getGroundTween() {
+        let target = {
+            opacity: 0
+        };
+
+        if (this._tween.ground) {
+            target = {
+                opacity: this._tween.ground.target.opacity
+            };
+        }
+
+        const tween = createjs.Tween.get(target);
+
+        tween.addEventListener('change', (event) => {
+            const tween = event.target.target;
+
+            this._ground.material.opacity = tween.opacity;
+        });
+
+        return tween;
     }
 }
