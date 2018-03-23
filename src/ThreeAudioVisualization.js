@@ -369,7 +369,7 @@ export default class ThreeAudioVisualization {
                 tile.children[0].material.opacity = target1.opacity * .2;
 
                 if (target1.opacity < .5) {
-                    tile.children[1].visible = false;
+                    // tile.children[1].visible = false;
                 }
             });
         }
@@ -392,7 +392,7 @@ export default class ThreeAudioVisualization {
                 tile.children[0].material.opacity = target1.opacity * .2;
 
                 if (target1.opacity < .5) {
-                    tile.children[1].visible = false;
+                    // tile.children[1].visible = false;
                 }
             });
         }
@@ -587,7 +587,7 @@ export default class ThreeAudioVisualization {
                     tile.children[0].material.opacity = target1.opacity * .2;
 
                     if (target1.opacity < .5) {
-                        tile.children[1].visible = false;
+                        // tile.children[1].visible = false;
                     }
                 });
             }
@@ -610,7 +610,7 @@ export default class ThreeAudioVisualization {
                     tile.children[0].material.opacity = target1.opacity * .2;
 
                     if (target1.opacity < .5) {
-                        tile.children[1].visible = false;
+                        // tile.children[1].visible = false;
                     }
                 });
             } else {
