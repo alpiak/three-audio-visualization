@@ -249,23 +249,26 @@ export default class ThreeAudioVisualization {
             tileItem.rotationZ = tile.rotation.z;
         }
 
-        tween
-            .to({
-                rotationX: tileItem.rotationX + rotationX,
-                rotationY: tileItem.rotationY + rotationY * tileItem.rotationYAdjust,
-                rotationZ: tileItem.rotationZ + rotationZ,
-                color: color || this._tiles[index].color
-            }, 300, createjs.Ease.circInOut)
-            .to({
-                rotationX: tileItem.rotationX,
-                rotationY: tileItem.rotationY,
-                rotationZ: tileItem.rotationZ,
-                color: this._tiles[index].color
-            }, 3600, createjs.Ease.getElasticOut(1.8, .2))
-            .call(() => {
-                tile.updateMatrix();
-            })
-            .paused = false;
+        return new Promise(resolve => {
+            tween
+                .to({
+                    rotationX: tileItem.rotationX + rotationX,
+                    rotationY: tileItem.rotationY + rotationY * tileItem.rotationYAdjust,
+                    rotationZ: tileItem.rotationZ + rotationZ,
+                    color: color || this._tiles[index].color
+                }, 300, createjs.Ease.circInOut)
+                .to({
+                    rotationX: tileItem.rotationX,
+                    rotationY: tileItem.rotationY,
+                    rotationZ: tileItem.rotationZ,
+                    color: this._tiles[index].color
+                }, 3600, createjs.Ease.getElasticOut(1.8, .2))
+                .call(() => {
+                    tile.updateMatrix();
+                    resolve();
+                })
+                .paused = false;
+        });
     }
 
     /**
@@ -336,11 +339,14 @@ export default class ThreeAudioVisualization {
                 break;
         }
 
-        tween.to(target, 500, createjs.Ease.quadInOut)
-            .paused = false;
+        return new Promise(resolve => {
+            tween.to(target, 500, createjs.Ease.quadInOut)
+                .call(resolve)
+                .paused = false;
+        });
     }
 
-    floatTile(index, offset, { color } = {}, callback) {
+    floatTile(index, offset, { color } = {}) {
         if (color && !/^#/.test(color)) {
             color = '#' + new THREE.Color(color).getHex().toString(16);
         }
@@ -394,23 +400,21 @@ export default class ThreeAudioVisualization {
 
         const tween = this._tweens.tiles1[index];
 
-        tween
-            .wait(3000 * Math.random())
-            .to({
-                floatOffset: offset,
-                color: color || this._tiles[index].color
-            }, 5000 + 5000 * Math.random(), createjs.Ease.quadInOut)
-            .wait(3000 * Math.random())
-            .to({
-                floatOffset: 0,
-                color: this._tiles[index].color
-            }, 5000 + 5000 * Math.random(), createjs.Ease.quadInOut)
-            .call(() => {
-                if (typeof callback === 'function') {
-                    callback();
-                }
-            })
-            .paused = false;
+        return new Promise(resolve => {
+            tween
+                .wait(3000 * Math.random())
+                .to({
+                    floatOffset: offset,
+                    color: color || this._tiles[index].color
+                }, 5000 + 5000 * Math.random(), createjs.Ease.quadInOut)
+                .wait(3000 * Math.random())
+                .to({
+                    floatOffset: 0,
+                    color: this._tiles[index].color
+                }, 5000 + 5000 * Math.random(), createjs.Ease.quadInOut)
+                .call(resolve)
+                .paused = false;
+        });
     }
 
     waveTiles({ x = -100, y = -100, z = 0, speed = .1, power = 1, type = 'shake', type: { animationType, direction }, color } = {}) {
@@ -421,59 +425,56 @@ export default class ThreeAudioVisualization {
                 distanceY = tile.position.y - y,
                 distanceZ = tile.position.z - z;
 
-            const rotation = [];
+            return new Promise(resolve => {
+                setTimeout(async () => {
+                    let _type;
 
-            rotation[0] = -distanceX && Math.PI / 2 * power / -distanceX;
-            rotation[1] = distanceY && Math.PI / 2 * power / distanceY;
-            rotation[2] = distanceZ && Math.PI / 2 * power / distanceZ;
+                    if (animationType) {
+                        _type = animationType;
+                    } else {
+                        _type = type;
+                    }
 
-            rotation.forEach(component => {
-                component = Math.min(component, Math.Pi / 2);
+                    switch (_type) {
+                        case 'rollover':
+                            if (!direction) {
+                                direction = (() => {
+                                    if (x === y) {
+                                        return 'cross';
+                                    }
+
+                                    return Math.abs(distanceX) < Math.abs(distanceY) ? 'vertical' : 'horizontal';
+                                })();
+                            }
+
+                            await this.rollOverTile(index, {
+                                direction,
+                                color
+                            });
+                            break;
+                        case 'shake':
+                        default:
+                            const rotation = [];
+
+                            rotation[0] = -distanceX && Math.PI / 2 * power / -distanceX;
+                            rotation[1] = distanceY && Math.PI / 2 * power / distanceY;
+                            rotation[2] = distanceZ && Math.PI / 2 * power / distanceZ;
+
+                            rotation.forEach(component => {
+                                component = Math.min(component, Math.Pi / 2);
+                            });
+
+                            await this.shakeTile(index, {
+                                rotationX: rotation[0],
+                                rotationY: rotation[1],
+                                rotationZ: rotation[2],
+                                color
+                            });
+                    }
+
+                    resolve();
+                }, tile.position.distanceTo(waveSourcePosition) / speed);
             });
-
-            setTimeout(() => {
-                let _type;
-
-                if (animationType) {
-                    _type = animationType;
-                } else {
-                    _type = type;
-                }
-
-                switch (_type) {
-                    case 'shake':
-                        this.shakeTile(index, {
-                            rotationX: rotation[0],
-                            rotationY: rotation[1],
-                            rotationZ: rotation[2],
-                            color
-                        });
-                        break;
-                    case 'rollover':
-                        if (!direction) {
-                            direction = (() => {
-                                if (x === y) {
-                                    return 'cross';
-                                }
-
-                                return Math.abs(distanceX) < Math.abs(distanceY) ? 'vertical' : 'horizontal';
-                            })();
-                        }
-
-                        this.rollOverTile(index, {
-                            direction,
-                            color
-                        });
-                        break;
-                    default:
-                        this.shakeTile(index, {
-                            rotationX: rotation[0],
-                            rotationY: rotation[1],
-                            rotationZ: rotation[2],
-                            color
-                        });
-                }
-            }, tile.position.distanceTo(waveSourcePosition) / speed);
         });
     }
 
@@ -481,12 +482,15 @@ export default class ThreeAudioVisualization {
         this._tiles.forEach((tileItem, index) => {
             tileItem.floating = true;
 
-            const animate = () => {
-                this.floatTile(index, offset, { color }, () => {
-                    if (tileItem.floating === true) {
-                        animate();
-                    }
-                });
+            let direction = Math.random() > .5 ? 1 : -1;
+
+            const animate = async () => {
+                await this.floatTile(index, offset * direction, { color });
+
+                if (tileItem.floating === true) {
+                    direction *= -1;
+                    animate();
+                }
             };
 
             animate();
@@ -629,38 +633,45 @@ export default class ThreeAudioVisualization {
 
             const tween2 = this._tweens.tiles2[index];
 
-            if (index < tilePositions.length) {
-                tween2
-                    .to({
-                        x: tilePositions[index][0],
-                        y: tilePositions[index][1],
-                        z: tilePositions[index][2],
-                        opacity: 1
-                    }, 1000, createjs.Ease.circInOut)
-                    .paused = false;
-            } else {
-                tween2
-                    .to({
-                        x: fadeOutPosition[0],
-                        y: fadeOutPosition[1],
-                        z: fadeOutPosition[2],
-                        opacity: 0
-                    }, 1000, createjs.Ease.circInOut)
-                    .paused = false;
-            }
+            return new Promise(resolve => {
+                if (index < tilePositions.length) {
+                    tween2
+                        .to({
+                            x: tilePositions[index][0],
+                            y: tilePositions[index][1],
+                            z: tilePositions[index][2],
+                            opacity: 1
+                        }, 1000, createjs.Ease.circInOut)
+                        .call(resolve)
+                        .paused = false;
+                } else {
+                    tween2
+                        .to({
+                            x: fadeOutPosition[0],
+                            y: fadeOutPosition[1],
+                            z: fadeOutPosition[2],
+                            opacity: 0
+                        }, 1000, createjs.Ease.circInOut)
+                        .call(resolve)
+                        .paused = false;
+                }
+            });
         });
     }
 
     moveLight({ x, y, z, duration } = {}) {
         const spotLight = this._spotLight;
 
-        this._tweens.spotLight
-            .to({
-                x: x || spotLight.position.x,
-                y: y || spotLight.position.y,
-                z: z || spotLight.position.z
-            }, duration || 10000, createjs.Ease.circInOut)
-            .paused = false;
+        return new Promise(resolve => {
+            this._tweens.spotLight
+                .to({
+                    x: x || spotLight.position.x,
+                    y: y || spotLight.position.y,
+                    z: z || spotLight.position.z
+                }, duration || 10000, createjs.Ease.circInOut)
+                .call(resolve)
+                .paused = false;
+        });
     }
 
     switchMode(mode) {

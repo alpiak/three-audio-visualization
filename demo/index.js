@@ -54,7 +54,7 @@ tilesAnimationToolBar.querySelector('.wave').addEventListener('click', () => {
 });
 
 tilesAnimationToolBar.querySelector('.float-start').addEventListener('click', () => {
-    threeAudioVisualization.startFloatingTiles(50);
+    threeAudioVisualization.startFloatingTiles(20);
 });
 
 tilesAnimationToolBar.querySelector('.float-stop').addEventListener('click', () => {
