@@ -44,11 +44,9 @@ export default class ThreeAudioVisualization {
      * @param {number} height
      * @param {Object} [options] - Options.
      * @param {string|Array[]} options.layout
-     * @param {string} options.primaryColor
-     * @param {string} options.accentColor
-     * @param {number[]} options.accentIndices
+     * @param {string} options.color
      */
-    init(width, height, { layout = 'musicNote', primaryColor = '#2eade8', accentColor, accentIndices } = {}) {
+    init(width, height, { layout = 'musicNote', color = '#4ccfff' } = {}) {
         this._scene = new Physijs.Scene();
         this._scene.setGravity(new THREE.Vector3( 0, -600, 0 ));
         this._camera = new THREE.PerspectiveCamera(45, width / height, .1, 1000);
@@ -80,41 +78,34 @@ export default class ThreeAudioVisualization {
 
         this._camera.lookAt(cameraTween.lookAtX, cameraTween.lookAtY, cameraTween.lookAtZ);
 
-        let tilePositions;
+        let tilesData;
 
         this._currentLayout = layout;
 
         if (typeof layout === 'string') {
-            tilePositions = getLayout(layout);
+            tilesData = getLayout(layout);
         } else if (Object.prototype.toString.call(layout) == '[object Array]') {
-            tilePositions = layout;
+            tilesData = layout;
         } else {
-            tilePositions = getLayout('musicNote');
+            tilesData = getLayout('musicNote');
         }
 
-        tilePositions.forEach((position, index) => {
-            let color = new THREE.Color(primaryColor),
-                accent = false;
+        tilesData.forEach((tileData, index) => {
+            const _color = new THREE.Color(color),
+                colorComponent = tileData.l * 100 + '%';
 
-            if (accentColor) {
-                accentIndices.forEach(accentIndex => {
-                    if (accentIndex === index) {
-                        color = new THREE.Color(accentColor);
-                        accent = true;
-                    }
-                })
-            }
+            _color.add(new THREE.Color(`rgb(${colorComponent}, ${colorComponent}, ${colorComponent})`));
 
-            const tile = generateTile({ color });
+            const tile = generateTile({ color: _color });
 
-            tile.position.set(...position);
+            tile.position.set(...tileData.coords);
             // glow(tile);
             tile.castShadow = true;
             this._scene.add(tile);
             this._tiles[index] = {
-                color: '#' + color.getHex().toString(16),
+                color: '#' + new THREE.Color(color).getHex().toString(16),
+                lightness: tileData.l,
                 object: tile,
-                accent,
 
                 // Adjust the rotation direction, value from [-1, 1].
                 rotationYAdjust: 1,
