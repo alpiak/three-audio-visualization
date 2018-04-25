@@ -24,7 +24,7 @@ const model = [
             material = Physijs.createMaterial(
                 new THREE.MeshPhongMaterial({
                     emissive: color,
-                    color: color,
+                    color,
                     specular: 0x222222,
                     shininess: 60,
                     opacity: .8,
