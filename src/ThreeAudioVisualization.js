@@ -2,7 +2,7 @@
  * Created by qhyang on 2018/1/12.
  */
 
-import * as THREE from 'three';
+import { WebGLRenderer, Color, Vector2, Vector3, TextureLoader, SpotLight, PCFSoftShadowMap, AxesHelper, SpotLightHelper, PerspectiveCamera } from 'three';
 import Physijs from './vendors/physijs/physi';
 import { createjs } from './vendors/createjs/tweenjs';
 import ColorPlugin from './vendors/createjs/ColorPlugin';
@@ -48,19 +48,19 @@ export default class ThreeAudioVisualization {
      */
     init(width, height, { layout = 'musicNote', color = '#4ccfff' } = {}) {
         this._scene = new Physijs.Scene();
-        this._scene.setGravity(new THREE.Vector3( 0, -600, 0 ));
-        this._camera = new THREE.PerspectiveCamera(45, width / height, .1, 1000);
-        this._renderer = new THREE.WebGLRenderer({ alpha: true });
+        this._scene.setGravity(new Vector3( 0, -600, 0 ));
+        this._camera = new PerspectiveCamera(45, width / height, .1, 1000);
+        this._renderer = new WebGLRenderer({ alpha: true });
 
         this._renderer.setSize(width, height);
         this._renderer.setClearAlpha(0);
         this._renderer.shadowMapEnabled = true;
-        this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this._renderer.shadowMap.type = PCFSoftShadowMap;
 
         // TODO: remove later
-        this._scene.add(new THREE.AxesHelper(20));
+        this._scene.add(new AxesHelper(20));
 
-        this._spotLight = new THREE.SpotLight(0x999999);
+        this._spotLight = new SpotLight(0x999999);
         this._spotLight.position.set(0, 200, 100);
         this._spotLight.target = this._scene;
         this._spotLight.castShadow = true;
@@ -68,7 +68,7 @@ export default class ThreeAudioVisualization {
         this._scene.add(this._spotLight);
 
         // TODO: remove later
-        this._scene.add(new THREE.SpotLightHelper(this._spotLight));
+        this._scene.add(new SpotLightHelper(this._spotLight));
 
         this._camera.position.set(0, 0, 650);
         this._tweens.camera0 = this._getCameraTween0();
@@ -91,10 +91,10 @@ export default class ThreeAudioVisualization {
         }
 
         tilesData.forEach((tileData, index) => {
-            const _color = new THREE.Color(color),
+            const _color = new Color(color),
                 colorComponent = tileData.l * 100 + '%';
 
-            _color.add(new THREE.Color(`rgb(${colorComponent}, ${colorComponent}, ${colorComponent})`));
+            _color.add(new Color(`rgb(${colorComponent}, ${colorComponent}, ${colorComponent})`));
 
             const tile = generateTile({ color: _color });
 
@@ -103,7 +103,7 @@ export default class ThreeAudioVisualization {
             tile.castShadow = true;
             this._scene.add(tile);
             this._tiles[index] = {
-                color: '#' + new THREE.Color(color).getHex().toString(16),
+                color: '#' + new Color(color).getHex().toString(16),
                 lightness: tileData.l,
                 object: tile,
 
@@ -117,7 +117,7 @@ export default class ThreeAudioVisualization {
             width: 260,
             height: 260,
             opacity: 0,
-            texture: new THREE.TextureLoader().load(require('./ground.png'))
+            texture: new TextureLoader().load(require('./ground.png'))
         });
 
         const roof = generatePlane({
@@ -215,7 +215,7 @@ export default class ThreeAudioVisualization {
 
     shakeTile(index, { rotationX = -Math.PI / 5, rotationY = Math.PI / 5, rotationZ = 0, color } = {}) {
         if (color && !/^#/.test(color)) {
-            color = '#' + new THREE.Color(color).getHex().toString(16);
+            color = '#' + new Color(color).getHex().toString(16);
         }
 
         const tileItem = this._tiles[index],
@@ -231,7 +231,7 @@ export default class ThreeAudioVisualization {
 
             this._tweens.tiles0[index].addEventListener('change', () => {
                 tile.rotation.set(tween.target.rotationX, tween.target.rotationY, tween.target.rotationZ);
-                tile.material.color.set(new THREE.Color(tween.target.color.replace(/-[0-9]+,/g, '0,')));
+                tile.material.color.set(new Color(tween.target.color.replace(/-[0-9]+,/g, '0,')));
             });
         }
 
@@ -277,7 +277,7 @@ export default class ThreeAudioVisualization {
      */
     rollOverTile(index, { color, direction = 'vertical' } = {}) {
         if (color && !/^#/.test(color)) {
-            color = '#' + new THREE.Color(color).getHex().toString(16);
+            color = '#' + new Color(color).getHex().toString(16);
         }
 
         const tileItem = this._tiles[index],
@@ -293,7 +293,7 @@ export default class ThreeAudioVisualization {
 
             this._tweens.tiles0[index].addEventListener('change', () => {
                 tile.rotation.set(tween.target.rotationX, tween.target.rotationY, tween.target.rotationZ);
-                tile.material.color.set(new THREE.Color(tween.target.color.replace(/-[0-9]+,/g, '0,')));
+                tile.material.color.set(new Color(tween.target.color.replace(/-[0-9]+,/g, '0,')));
             });
         }
 
@@ -342,7 +342,7 @@ export default class ThreeAudioVisualization {
 
     floatTile(index, offset, { color } = {}, callback) {
         if (color && !/^#/.test(color)) {
-            color = '#' + new THREE.Color(color).getHex().toString(16);
+            color = '#' + new Color(color).getHex().toString(16);
         }
 
         const tileItem = this._tiles[index],
@@ -359,7 +359,7 @@ export default class ThreeAudioVisualization {
                     target1 = this._tweens.tiles2[index].target;
 
                 tile.position.set(target1.x, target1.y, target1.z + target.floatOffset);
-                tile.material.color.set(new THREE.Color(target.color.replace(/-[0-9]+,/g, '0,')));
+                tile.material.color.set(new Color(target.color.replace(/-[0-9]+,/g, '0,')));
                 tile.material.opacity = target1.opacity * .8;
                 tile.children[0].material.opacity = target1.opacity * .2;
 
@@ -382,7 +382,7 @@ export default class ThreeAudioVisualization {
                     target1 = this._tweens.tiles2[index].target;
 
                 tile.position.set(target1.x, target1.y, target1.z + target.floatOffset);
-                tile.material.color.set(new THREE.Color(target.color.replace(/-[0-9]+,/g, '0,')));
+                tile.material.color.set(new Color(target.color.replace(/-[0-9]+,/g, '0,')));
                 tile.material.opacity = target1.opacity * .8;
                 tile.children[0].material.opacity = target1.opacity * .2;
 
@@ -416,7 +416,7 @@ export default class ThreeAudioVisualization {
     waveTiles({ x = -100, y = -100, z = 0, speed = .1, power = 1, type = 'shake', type: { animationType, direction }, color } = {}) {
         this._tiles.forEach((_tile, index) => {
             const tile = _tile.object,
-                waveSourcePosition = new THREE.Vector3(x, y, z),
+                waveSourcePosition = new Vector3(x, y, z),
                 distanceX = tile.position.x - x,
                 distanceY = tile.position.y - y,
                 distanceZ = tile.position.z - z;
@@ -555,7 +555,7 @@ export default class ThreeAudioVisualization {
                     const target = this._tweens.tiles0[index].target;
 
                     tile.rotation.set(target.rotationX, target.rotationY, target.rotationZ);
-                    tile.material.color.set(new THREE.Color(target.color.replace(/-[0-9]+,/g, '0,')));
+                    tile.material.color.set(new Color(target.color.replace(/-[0-9]+,/g, '0,')));
                 });
             } else {
                 this._tweens.tiles0[index].to({
@@ -577,7 +577,7 @@ export default class ThreeAudioVisualization {
                         target1 = this._tweens.tiles2[index].target;
 
                     tile.position.set(target1.x, target1.y, target1.z + target.floatOffset);
-                    tile.material.color.set(new THREE.Color(target.color.replace(/-[0-9]+,/g, '0,')));
+                    tile.material.color.set(new Color(target.color.replace(/-[0-9]+,/g, '0,')));
                     tile.material.opacity = target1.opacity * .8;
                     tile.children[0].material.opacity = target1.opacity * .2;
 
@@ -600,7 +600,7 @@ export default class ThreeAudioVisualization {
                         target1 = this._tweens.tiles2[index].target;
 
                     tile.position.set(target1.x, target1.y, target1.z + target.floatOffset);
-                    tile.material.color.set(new THREE.Color(target.color.replace(/-[0-9]+,/g, '0,')));
+                    tile.material.color.set(new Color(target.color.replace(/-[0-9]+,/g, '0,')));
                     tile.material.opacity = target1.opacity * .8;
                     tile.children[0].material.opacity = target1.opacity * .2;
 
@@ -677,7 +677,7 @@ export default class ThreeAudioVisualization {
         tweens.camera1 = this._getCameraTween1();
         tweens.ground  = this._getGroundTween();
 
-        const _vec3 = new THREE.Vector3;
+        const _vec3 = new Vector3;
 
         switch (mode) {
             case 'physics':
@@ -770,7 +770,7 @@ export default class ThreeAudioVisualization {
     }
 
     applyForces(...forces) {
-        const _vec3 = new THREE.Vector3;
+        const _vec3 = new Vector3;
 
         this._tiles.forEach(({ object }) => {
             const groupSize = 100 / forces.length; // The radius range of a ring area.
@@ -797,8 +797,8 @@ export default class ThreeAudioVisualization {
     }
 
     enableReactiveCamera() {
-        const _previousVec2 = new THREE.Vector2,
-            _vec2 = new THREE.Vector2;
+        const _previousVec2 = new Vector2,
+            _vec2 = new Vector2;
 
         _onMouseMove = (e) => {
             _vec2.set(e.x, e.y);
@@ -888,7 +888,7 @@ export default class ThreeAudioVisualization {
         }
 
         const tween = createjs.Tween.get(target, { override: true }),
-            _vec3 = new THREE.Vector3;
+            _vec3 = new Vector3;
 
         tween.addEventListener('change', (event) => {
             const tween0 = event.target.target;
@@ -920,7 +920,7 @@ export default class ThreeAudioVisualization {
         }
 
         const tween = createjs.Tween.get(target, { override: true }),
-            _vec3 = new THREE.Vector3;
+            _vec3 = new Vector3;
 
         tween.addEventListener('change', (event) => {
             const tween0 = this._tweens.camera0.target;

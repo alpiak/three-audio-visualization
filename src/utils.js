@@ -2,7 +2,8 @@
  * Created by qhyang on 2018/1/15.
  */
 
-import * as THREE from 'three';
+import { Vector3, MeshLambertMaterial, MeshPhongMaterial, EdgesHelper, PlaneGeometry } from 'three';
+import { ConvexGeometry } from './vendors/three/ConvexGeometry'
 import Physijs from './vendors/physijs/physi';
 import './vendors/three/ConvexGeometry';
 import * as THREEx from './vendors/threex.geometricglow/threex';
@@ -20,9 +21,9 @@ const model = [
     ],
 
     generateTile = ({ color, restitution = .95 } = {}) => {
-        const geometry = new THREE.ConvexGeometry(model[0].map(vertex => new THREE.Vector3(vertex[0], vertex[1], vertex[2]))),
+        const geometry = new ConvexGeometry(model[0].map(vertex => new Vector3(vertex[0], vertex[1], vertex[2]))),
             material = Physijs.createMaterial(
-                new THREE.MeshPhongMaterial({
+                new MeshPhongMaterial({
                     emissive: color,
                     color,
                     specular: 0x222222,
@@ -32,7 +33,7 @@ const model = [
                 }),
             1, restitution),
             mesh = new Physijs.ConvexMesh(geometry, material),
-            frame = new THREE.EdgesHelper(mesh, 0xffffff);
+            frame = new EdgesHelper(mesh, 0xffffff);
 
         frame.material.opacity = .2;
         frame.material.transparent = true;
@@ -43,9 +44,9 @@ const model = [
     },
 
     generatePlane = ({ width, height, opacity = 1, restitution = .8, texture } = {}) => {
-        const geometry = new THREE.PlaneGeometry(width, height, 1, 1),
+        const geometry = new PlaneGeometry(width, height, 1, 1),
             material = Physijs.createMaterial(
-                new THREE.MeshLambertMaterial({
+                new MeshLambertMaterial({
                     map: texture || null,
                     opacity: opacity,
                     transparent: true
