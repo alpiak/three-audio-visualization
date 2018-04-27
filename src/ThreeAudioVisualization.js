@@ -2,7 +2,7 @@
  * Created by qhyang on 2018/1/12.
  */
 
-import * as THREE from 'three';
+import { WebGLRenderer, Color, Vector2, Vector3, TextureLoader, SpotLight, PCFSoftShadowMap, AxesHelper, SpotLightHelper, PerspectiveCamera } from 'three';
 import Physijs from './vendors/physijs/physi';
 import { createjs } from './vendors/createjs/tweenjs';
 import ColorPlugin from './vendors/createjs/ColorPlugin';
@@ -47,19 +47,19 @@ export default class ThreeAudioVisualization {
      */
     init(width, height, { layout = 'musicNote', color = '#4ccfff' } = {}) {
         this._scene = new Physijs.Scene();
-        this._scene.setGravity(new THREE.Vector3( 0, -600, 0 ));
-        this._camera = new THREE.PerspectiveCamera(45, width / height, .1, 1000);
-        this._renderer = new THREE.WebGLRenderer({ alpha: true });
+        this._scene.setGravity(new Vector3( 0, -600, 0 ));
+        this._camera = new PerspectiveCamera(45, width / height, .1, 1000);
+        this._renderer = new WebGLRenderer({ alpha: true });
 
         this._renderer.setSize(width, height);
         this._renderer.setClearAlpha(0);
         this._renderer.shadowMapEnabled = true;
-        this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this._renderer.shadowMap.type = PCFSoftShadowMap;
 
         // TODO: remove later
-        this._scene.add(new THREE.AxesHelper(20));
+        this._scene.add(new AxesHelper(20));
 
-        this._spotLight = new THREE.SpotLight(0x999999);
+        this._spotLight = new SpotLight(0x999999);
         this._spotLight.position.set(0, 200, 100);
         this._spotLight.target = this._scene;
         this._spotLight.castShadow = true;
@@ -67,7 +67,7 @@ export default class ThreeAudioVisualization {
         this._scene.add(this._spotLight);
 
         // TODO: remove later
-        this._scene.add(new THREE.SpotLightHelper(this._spotLight));
+        this._scene.add(new SpotLightHelper(this._spotLight));
 
         this._camera.position.set(0, 0, 650);
         this._tweens.camera0 = this._getCameraTween0();
@@ -90,14 +90,14 @@ export default class ThreeAudioVisualization {
         }
 
         tilesData.forEach((tileData, index) => {
-            const tile = generateTile({ color: new THREE.Color(color).offsetHSL(0, 0, tileData.l) });
+            const tile = generateTile({ color: new Color(color).offsetHSL(0, 0, tileData.l) });
 
             tile.position.set(...tileData.coords);
             // glow(tile);
             tile.castShadow = true;
             this._scene.add(tile);
             this._tiles[index] = {
-                color: '#' + new THREE.Color(color).getHex().toString(16),
+                color: '#' + new Color(color).getHex().toString(16),
                 lightness: tileData.l,
                 body: tile,
 
@@ -111,7 +111,7 @@ export default class ThreeAudioVisualization {
             width: 260,
             height: 260,
             opacity: 0,
-            texture: new THREE.TextureLoader().load(require('./ground.png'))
+            texture: new TextureLoader().load(require('./ground.png'))
         });
 
         const roof = generatePlane({
@@ -209,7 +209,7 @@ export default class ThreeAudioVisualization {
 
     shakeTile(index, { rotationX = -Math.PI / 5, rotationY = Math.PI / 5, rotationZ = 0, color } = {}) {
         if (color && !/^#/.test(color)) {
-            color = '#' + new THREE.Color(color).getHexString();
+            color = '#' + new Color(color).getHexString();
         }
 
         const tile = this._tiles[index],
@@ -240,13 +240,13 @@ export default class ThreeAudioVisualization {
                     rotationX: tile.rotationX + rotationX,
                     rotationY: tile.rotationY + rotationY * tile.rotationYAdjust,
                     rotationZ: tile.rotationZ + rotationZ,
-                    color: '#' + new THREE.Color(color || tile.color).offsetHSL(0, 0, tile.lightness).getHexString()
+                    color: '#' + new Color(color || tile.color).offsetHSL(0, 0, tile.lightness).getHexString()
                 }, 300, createjs.Ease.circInOut)
                 .to({
                     rotationX: tile.rotationX,
                     rotationY: tile.rotationY,
                     rotationZ: tile.rotationZ,
-                    color: '#' + new THREE.Color(tile.color).offsetHSL(0, 0, tile.lightness).getHexString()
+                    color: '#' + new Color(tile.color).offsetHSL(0, 0, tile.lightness).getHexString()
                 }, 3600, createjs.Ease.getElasticOut(1.8, .2))
                 .call(() => {
                     tileBody.updateMatrix();
@@ -265,7 +265,7 @@ export default class ThreeAudioVisualization {
      */
     rollOverTile(index, { color, direction = 'vertical' } = {}) {
         if (color && !/^#/.test(color)) {
-            color = '#' + new THREE.Color(color).getHexString();
+            color = '#' + new Color(color).getHexString();
         }
 
         const tile = this._tiles[index],
@@ -290,7 +290,7 @@ export default class ThreeAudioVisualization {
         }
 
         let target = {
-            color: '#' + new THREE.Color(color || tile.color).offsetHSL(0, 0, tile.lightness).getHexString()
+            color: '#' + new Color(color || tile.color).offsetHSL(0, 0, tile.lightness).getHexString()
         };
 
         switch (direction) {
@@ -348,7 +348,7 @@ export default class ThreeAudioVisualization {
     waveTiles({ x = -100, y = -100, z = 0, speed = .1, power = 1, type = 'shake', type: { animationType, direction }, color } = {}) {
         this._tiles.forEach((tile, index) => {
             const tileBody = tile.body,
-                waveSourcePosition = new THREE.Vector3(x, y, z),
+                waveSourcePosition = new Vector3(x, y, z),
                 distanceX = tileBody.position.x - x,
                 distanceY = tileBody.position.y - y,
                 distanceZ = tileBody.position.z - z;
@@ -454,7 +454,7 @@ export default class ThreeAudioVisualization {
         if (lengthDiff > 0) {
             for (let i = tilesData.length - lengthDiff - 1; i < tilesData.length; i++) {
                 const color = this._tiles[0].color,
-                    tile = generateTile({ color: new THREE.Color(color).offsetHSL(0, 0, tilesData[i].l) });
+                    tile = generateTile({ color: new Color(color).offsetHSL(0, 0, tilesData[i].l) });
 
                 tile.position.set(...fadeOutPosition);
                 tile.material.opacity = 0;
@@ -480,7 +480,7 @@ export default class ThreeAudioVisualization {
                 this._tweens.tiles0[index] = this._getTileTween0(index);
             } else {
                 this._tweens.tiles0[index].to({
-                    color: '#' + new THREE.Color(tile.color).offsetHSL(0, 0, tile.lightness).getHexString(),
+                    color: '#' + new Color(tile.color).offsetHSL(0, 0, tile.lightness).getHexString(),
                     opacity: tileBody.material.opacity / .8
                 }, 0);
             }
@@ -555,7 +555,7 @@ export default class ThreeAudioVisualization {
         tweens.camera1 = this._getCameraTween1();
         tweens.ground  = this._getGroundTween();
 
-        const _vec3 = new THREE.Vector3;
+        const _vec3 = new Vector3;
 
         switch (mode) {
             case 'physics':
@@ -648,7 +648,7 @@ export default class ThreeAudioVisualization {
     }
 
     applyForces(...forces) {
-        const _vec3 = new THREE.Vector3;
+        const _vec3 = new Vector3;
 
         this._tiles.forEach(({ body }) => {
             const groupSize = 100 / forces.length; // The radius range of a ring area.
@@ -675,8 +675,8 @@ export default class ThreeAudioVisualization {
     }
 
     enableReactiveCamera() {
-        const _previousVec2 = new THREE.Vector2,
-            _vec2 = new THREE.Vector2;
+        const _previousVec2 = new Vector2,
+            _vec2 = new Vector2;
 
         _onMouseMove = (e) => {
             _vec2.set(e.x, e.y);
@@ -737,7 +737,7 @@ export default class ThreeAudioVisualization {
                 rotationX: body.rotation.x,
                 rotationY: body.rotation.y,
                 rotationZ: body.rotation.z,
-                color: '#' + new THREE.Color(tile.color).offsetHSL(0, 0, tile.lightness).getHexString(),
+                color: '#' + new Color(tile.color).offsetHSL(0, 0, tile.lightness).getHexString(),
                 opacity: body.material.opacity / .8
             });
 
@@ -831,7 +831,7 @@ export default class ThreeAudioVisualization {
         }
 
         const tween = createjs.Tween.get(target, { override: true }),
-            _vec3 = new THREE.Vector3;
+            _vec3 = new Vector3;
 
         tween.addEventListener('change', (event) => {
             const tween0 = event.target.target;
@@ -863,7 +863,7 @@ export default class ThreeAudioVisualization {
         }
 
         const tween = createjs.Tween.get(target, { override: true }),
-            _vec3 = new THREE.Vector3;
+            _vec3 = new Vector3;
 
         tween.addEventListener('change', (event) => {
             const tween0 = this._tweens.camera0.target;
