@@ -7,7 +7,7 @@ import Physijs from './vendors/physijs/physi';
 import './vendors/three/ConvexGeometry';
 import * as THREEx from './vendors/threex.geometricglow/threex';
 
-import { musicNote, play } from './layouts';
+import { musicNote, play, pause, stop, previousTrack, nextTrack } from './layouts';
 
 const model = [
         [
@@ -77,6 +77,14 @@ const model = [
                 return musicNote;
             case 'play':
                 return play;
+            case 'pause':
+                return pause;
+            case 'stop':
+                return stop;
+            case'previousTrack':
+                return previousTrack;
+            case'nextTrack':
+                return nextTrack;
             default:
                 return musicNote;
         }

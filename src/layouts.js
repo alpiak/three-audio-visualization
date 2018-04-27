@@ -3,14 +3,14 @@
  */
 
 const musicNote = [
-                                                                                                                { coords: [12, 84, 0], l: .35 },  { coords: [36, 84, 0], l: .15 },
-                                                                                                                { coords: [12, 60, 0], l: .15 },  { coords: [36, 60, 0], l: 0 },  { coords: [60, 60, 0], l: .09 },
-                                                                                                                { coords: [12, 36, 0], l: 0 },  { coords: [60, 36, 0], l: 0 },
-                                                                                                                { coords: [12, 12, 0], l: 0 },
-                                        { coords: [-36, -12, 0], l: .2 },   { coords: [-12, -12, 0], l: .16 },  { coords: [12, -12, 0], l: 0 },
-    { coords: [-60, -36, 0], l: .2 },   { coords: [-36, -36, 0], l: 0 },    { coords: [-12, -36, 0], l: 0 },    { coords: [12, -36, 0], l: 0 },
-                                        { coords: [-36, -60, 0], l: 0 },    { coords: [-12, -60, 0], l: .1 }
-],
+                                                                                                                    { coords: [12, 84, 0], l: .35 },  { coords: [36, 84, 0], l: .15 },
+                                                                                                                    { coords: [12, 60, 0], l: .15 },  { coords: [36, 60, 0], l: 0 },  { coords: [60, 60, 0], l: .09 },
+                                                                                                                    { coords: [12, 36, 0], l: 0 },  { coords: [60, 36, 0], l: 0 },
+                                                                                                                    { coords: [12, 12, 0], l: 0 },
+                                            { coords: [-36, -12, 0], l: .2 },   { coords: [-12, -12, 0], l: .16 },  { coords: [12, -12, 0], l: 0 },
+        { coords: [-60, -36, 0], l: .2 },   { coords: [-36, -36, 0], l: 0 },    { coords: [-12, -36, 0], l: 0 },    { coords: [12, -36, 0], l: 0 },
+                                            { coords: [-36, -60, 0], l: 0 },    { coords: [-12, -60, 0], l: .1 }
+    ],
     play = [
         { coords: [-36, 48, 0], l: .35 },
                 { coords: [-12, 36, 0], l: .15 },
@@ -21,6 +21,41 @@ const musicNote = [
         { coords: [-36, -24, 0], l: 0 },  { coords: [12, -24, 0], l: 0 },
                 { coords: [-12, -36, 0], l: 0 },
         { coords: [-36, -48, 0], l: 0 }
+    ],
+    pause = [
+        { coords: [-48, 48, 0], l: 0 }, { coords: [-24, 48, 0], l: 0 },     { coords: [24, 48, 0], l: 0 }, { coords: [48, 48, 0], l: 0 },
+        { coords: [-48, 24, 0], l: 0 }, { coords: [-24, 24, 0], l: 0 },     { coords: [24, 24, 0], l: 0 }, { coords: [48, 24, 0], l: 0 },
+        { coords: [-48, 0, 0], l: 0 }, { coords: [-24, 0, 0], l: 0 },       { coords: [24, 0, 0], l: 0 }, { coords: [48, 0, 0], l: 0 },
+        { coords: [-48, -24, 0], l: 0 }, { coords: [-24, -24, 0], l: 0 },   { coords: [24, -24, 0], l: 0 }, { coords: [48, -24, 0], l: 0 },
+        { coords: [-48, -48, 0], l: 0 }, { coords: [-24, -48, 0], l: 0 },   { coords: [24, -48, 0], l: 0 }, { coords: [48, -48, 0], l: 0 }
+    ],
+    stop = [
+        { coords: [-36, 36, 0], l: 0 }, { coords: [-12, 36, 0], l: 0 }, { coords: [12, 36, 0], l: 0 }, { coords: [36, 36, 0], l: 0 },
+        { coords: [-36, 12, 0], l: 0 }, { coords: [-12, 12, 0], l: 0 }, { coords: [12, 12, 0], l: 0 }, { coords: [36, 12, 0], l: 0 },
+        { coords: [-36, -12, 0], l: 0 }, { coords: [-12, -12, 0], l: 0 }, { coords: [12, -12, 0], l: 0 }, { coords: [36, -12, 0], l: 0 },
+        { coords: [-36, -36, 0], l: 0 }, { coords: [-12, -36, 0], l: 0 }, { coords: [12, -36, 0], l: 0 }, { coords: [36, -36, 0], l: 0 }
+    ],
+    previousTrack = [
+    { coords: [-60, 48, 0], l: 0 },                                                                             { coords: [60, 48, 0], l: 0 },
+                                                                                            { coords: [36, 36, 0], l: 0 },
+        { coords: [-60, 24, 0], l: 0 },                                     { coords: [12, 24, 0], l: 0 },      { coords: [60, 24, 0], l: 0 },
+                                                        { coords: [-12, 12, 0], l: 0 },      { coords: [36, 12, 0], l: 0 },
+        { coords: [-60, 0, 0], l: 0 },   { coords: [-36, 0, 0], l: 0 },     { coords: [12, 0, 0], l: 0 },       { coords: [60, 0, 0], l: 0 },
+                                                        { coords: [-12, -12, 0], l: 0 },      { coords: [36, -12, 0], l: 0 },
+        { coords: [-60, -24, 0], l: 0 },                                    { coords: [12, -24, 0], l: 0 },     { coords: [60, -24, 0], l: 0 },
+                                                                                            { coords: [36, -36, 0], l: 0 },
+        { coords: [-60, -48, 0], l: 0 },                                                                        { coords: [60, -48, 0], l: 0 }
+    ],
+    nextTrack = [
+        { coords: [-60, 48, 0], l: 0 },                                                                             { coords: [60, 48, 0], l: 0 },
+                    { coords: [-36, 36, 0], l: 0 },
+        { coords: [-60, 24, 0], l: 0 },     { coords: [-12, 24, 0], l: 0 },                                         { coords: [60, 24, 0], l: 0 },
+                    { coords: [-36, 12, 0], l: 0 },     { coords: [12, 12, 0], l: 0 },
+        { coords: [-60, 0, 0], l: 0 },      { coords: [-12, 0, 0], l: 0 },      { coords: [36, 0, 0], l: 0 },       { coords: [60, 0, 0], l: 0 },
+                    { coords: [-36, -12, 0], l: 0 },    { coords: [12, -12, 0], l: 0 },
+        { coords: [-60, -24, 0], l: 0 },    { coords: [-12, -24, 0], l: 0 },                                        { coords: [60, -24, 0], l: 0 },
+                    { coords: [-36, -36, 0], l: 0 },
+        { coords: [-60, -48, 0], l: 0 },                                                                            { coords: [60, -48, 0], l: 0 }
     ];
 
-export { musicNote, play }
+export { musicNote, play, pause, stop, previousTrack, nextTrack }
