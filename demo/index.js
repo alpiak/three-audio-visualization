@@ -24,11 +24,14 @@ tileAnimationToolBar.querySelector('button').addEventListener('click', () => {
 
     switch (type) {
         case 'shake':
-            threeAudioVisualization.shakeTile(tileAnimationToolBar.querySelector('.id').value);
+            threeAudioVisualization.shakeTile(tileAnimationToolBar.querySelector('.id').value, {
+                color: tileAnimationToolBar.querySelector('.color').value || undefined
+            });
             break;
         case 'rollover':
             threeAudioVisualization.rollOverTile(tileAnimationToolBar.querySelector('.id').value, {
-                direction: tileAnimationToolBar.querySelector('.direction').value
+                direction: tileAnimationToolBar.querySelector('.direction').value,
+                color: tileAnimationToolBar.querySelector('.color').value || undefined
             });
             break;
         case 'float':

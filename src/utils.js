@@ -34,7 +34,7 @@ const model = [
             mesh = new Physijs.ConvexMesh(geometry, material),
             frame = new THREE.EdgesHelper(mesh, 0xffffff);
 
-        frame.material.opacity = .2;
+        frame.material.opacity = new THREE.Color(color).getHSL().l / 8;
         frame.material.transparent = true;
 
         mesh.add(frame);
@@ -43,7 +43,7 @@ const model = [
     },
 
     generatePlane = ({ width, height, opacity = 1, restitution = .8, texture } = {}) => {
-        const geometry = new THREE.PlaneGeometry(width, height, 1, 1),
+            const geometry = new THREE.PlaneGeometry(width, height, 1, 1),
             material = Physijs.createMaterial(
                 new THREE.MeshLambertMaterial({
                     map: texture || null,
