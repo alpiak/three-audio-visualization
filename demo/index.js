@@ -5,7 +5,7 @@
 import { Howl } from 'howler';
 import Clubber from 'clubber';
 
-import ThreeAudioVisualization from '../src/ThreeAudioVisualization';
+import ThreeAudioVisualization from '../dist/ThreeAudioVisualization';
 
 const threeAudioVisualization = new ThreeAudioVisualization;
 
