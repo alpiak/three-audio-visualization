@@ -36,7 +36,7 @@ const models = [
             mesh = new Physijs.ConvexMesh(geometry, material),
             frame = new EdgesHelper(mesh, 0xffffff);
 
-        frame.material.opacity = new Color(color).getHSL().l / 8;
+        frame.material.opacity = new Color(color).getHSL().l / 8.5;
         frame.material.transparent = true;
 
         mesh.add(frame);

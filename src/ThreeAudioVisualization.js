@@ -448,7 +448,7 @@ export default class ThreeAudioVisualization {
             tilesData = getLayout('musicNote');
         }
 
-        const fadeOutPosition = [0, 0, 300],
+        const fadeOutOffset = 100,
             lengthDiff = tilesData.length - this._tiles.length;
 
         if (lengthDiff > 0) {
@@ -456,7 +456,7 @@ export default class ThreeAudioVisualization {
                 const color = this._tiles[0].color,
                     tile = generateTile({ color: new Color(color).offsetHSL(0, 0, tilesData[i].l) });
 
-                tile.position.set(...fadeOutPosition);
+                tile.position.set(tilesData[i].coords[0], 0, fadeOutOffset);
                 tile.material.opacity = 0;
                 // glow(tile);
                 tile.castShadow = true;
@@ -498,7 +498,7 @@ export default class ThreeAudioVisualization {
 
             if (index < tilesData.length) {
                 tween0
-                    .to({ opacity: 1 }, 1000, createjs.Ease.circInOut)
+                    .to({ opacity: 1 }, 1000, createjs.Ease.quintOut)
                     .paused = false;
 
                 tween2
@@ -506,19 +506,17 @@ export default class ThreeAudioVisualization {
                         x: tilesData[index].coords[0],
                         y: tilesData[index].coords[1],
                         z: tilesData[index].coords[2]
-                    }, 1000, createjs.Ease.circInOut)
+                    }, 1000, createjs.Ease.quintOut)
                     .paused = false;
             } else {
                 tween0
-                    .to({ opacity: 0 }, 1000, createjs.Ease.circInOut)
+                    .to({ opacity: 0 }, 1000, createjs.Ease.quintOut)
                     .paused = false;
 
                 tween2
                     .to({
-                        x: fadeOutPosition[0],
-                        y: fadeOutPosition[1],
-                        z: fadeOutPosition[2]
-                    }, 1000, createjs.Ease.circInOut)
+                        z: fadeOutOffset
+                    }, 1000, createjs.Ease.quintOut)
                     .paused = false;
             }
         });
@@ -803,7 +801,7 @@ export default class ThreeAudioVisualization {
             body.material.emissive.setStyle(color);
             body.material.color.setStyle(color);
             body.material.opacity = tweenTarget.opacity * .8;
-            body.children[0].material.opacity = body.material.color.getHSL().l / 8 * tweenTarget.opacity;
+            body.children[0].material.opacity = body.material.color.getHSL().l / 85 * tweenTarget.opacity;
 
             if (tweenTarget.opacity < .5) {
                 // tile.children[1].visible = false;

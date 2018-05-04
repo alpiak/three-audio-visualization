@@ -9,10 +9,7 @@ import ThreeAudioVisualization from '../src/ThreeAudioVisualization';
 
 const threeAudioVisualization = new ThreeAudioVisualization;
 
-threeAudioVisualization.init(window.innerWidth, window.innerHeight, {
-    accentColor: '#fff',
-    accentIndices: [6]
-});
+threeAudioVisualization.init(window.innerWidth, window.innerHeight);
 
 threeAudioVisualization.mount(document.body);
 threeAudioVisualization.start();
