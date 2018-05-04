@@ -42,7 +42,7 @@ const model = [
         return mesh;
     },
 
-    generatePlane = ({ width, height, opacity = 1, restitution = .8, texture } = {}) => {
+    generatePlane = ({ width, height, opacity = 1, restitution = .7, texture } = {}) => {
         const geometry = new THREE.PlaneGeometry(width, height, 1, 1),
             material = Physijs.createMaterial(
                 new THREE.MeshLambertMaterial({
