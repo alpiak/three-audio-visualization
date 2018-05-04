@@ -66,9 +66,6 @@ export default class ThreeAudioVisualization {
         this._tweens.spotLight = this._getSpotLightTween();
         this._scene.add(this._spotLight);
 
-        // TODO: remove later
-        this._scene.add(new SpotLightHelper(this._spotLight));
-
         this._camera.position.set(0, 0, 650);
         this._tweens.camera0 = this._getCameraTween0();
         this._tweens.camera1 = this._getCameraTween1();
@@ -481,6 +478,9 @@ export default class ThreeAudioVisualization {
             } else {
                 this._tweens.tiles0[index].to({
                     color: '#' + new Color(tile.color).offsetHSL(0, 0, tile.lightness).getHexString(),
+                    rotationX: Math.floor(tileBody.rotation.x / Math.PI) * Math.PI,
+                    rotationY: Math.floor(tileBody.rotation.y / Math.PI) * Math.PI,
+                    rotationZ: Math.floor(tileBody.rotation.z / Math.PI) * Math.PI,
                     opacity: tileBody.material.opacity / .8
                 }, 0);
             }
@@ -491,6 +491,12 @@ export default class ThreeAudioVisualization {
 
             if (!this._tweens.tiles2[index]) {
                 this._tweens.tiles2[index] = this._getTileTween2(index);
+            } else {
+                this._tweens.tiles2[index].to({
+                    x: tileBody.position.x,
+                    y: tileBody.position.y,
+                    z: tileBody.position.z
+                }, 0);
             }
 
             const tween0 = this._tweens.tiles0[index],
@@ -587,7 +593,7 @@ export default class ThreeAudioVisualization {
                     tweens.camera1
                         .to({
                             lookAtX: this._ground.position.x,
-                            lookAtY: this._ground.position.y + 120,
+                            lookAtY: this._ground.position.y + 130,
                             lookAtZ: this._ground.position.z
                         }, 2800, createjs.Ease.quartInOut)
                         .paused = false;
@@ -601,7 +607,7 @@ export default class ThreeAudioVisualization {
                     tweens.spotLight
                         .to({
                             x: 0,
-                            y: 0,
+                            y: 50,
                             z: 0,
                             intensity: 2
                         }, 2800, createjs.Ease.quartInOut)
@@ -786,9 +792,9 @@ export default class ThreeAudioVisualization {
         const tile = this._tiles[index],
             body = tile.body,
             tween = createjs.Tween.get({
-                rotationX: body.rotation.x,
-                rotationY: body.rotation.y,
-                rotationZ: body.rotation.z,
+                rotationX: Math.floor(body.rotation.x / Math.PI) * Math.PI,
+                rotationY: Math.floor(body.rotation.y / Math.PI) * Math.PI,
+                rotationZ: Math.floor(body.rotation.z / Math.PI) * Math.PI,
                 color: '#' + new Color(tile.color).offsetHSL(0, 0, tile.lightness).getHexString(),
                 opacity: body.material.opacity / .8
             });
