@@ -10,18 +10,19 @@ import * as THREEx from './vendors/threex.geometricglow/threex';
 
 import { musicNote, play, pause, stop, previousTrack, nextTrack } from './layouts';
 
-const model = [
+const models = [
         [
+            [-3, -9, -3], [2, 2, -3.8],
             [-10, -10, -2], [-10, 10, -2], [10, 10, -2], [10, -10, -2],
             [-11, -10, -1], [-10, -11, -1], [-11, 10, -1], [-10, 11, -1], [11, 10, -1], [10, 11, -1], [11, -10, -1], [10, -11, -1],
             [-11, -10, 1], [-10, -11, 1], [-11, 10, 1], [-10, 11, 1], [11, 10, 1], [10, 11, 1], [11, -10, 1], [10, -11, 1],
             [-10, -10, 2], [-10, 10, 2], [10, 10, 2], [10, -10, 2],
-            [-3, -9, 3], [3, 7, 4]
+            [-3.5, -9, 3], [2.5, 7, 4]
         ]
     ],
 
     generateTile = ({ color, restitution = .95 } = {}) => {
-        const geometry = new ConvexGeometry(model[0].map(vertex => new Vector3(vertex[0], vertex[1], vertex[2]))),
+        const geometry = new ConvexGeometry(models[0].map(vertex => new Vector3(vertex[0], vertex[1], vertex[2]))),
             material = Physijs.createMaterial(
                 new MeshPhongMaterial({
                     emissive: color,
@@ -39,6 +40,10 @@ const model = [
         frame.material.transparent = true;
 
         mesh.add(frame);
+
+        mesh.rotation.x = Math.PI * Math.floor(Math.random() * 2);
+        mesh.rotation.y = Math.PI * Math.floor(Math.random() * 2);
+        mesh.rotation.z = Math.PI / 2 * Math.floor(Math.random() * 4);
 
         return mesh;
     },
