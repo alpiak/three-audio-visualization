@@ -47,7 +47,13 @@ module.exports = {
             }
         ]
     },
-    plugins: [ new UglifyJSPlugin ],
+    plugins: [
+        new UglifyJSPlugin({
+            uglifyOptions: {
+                compress: false
+            }
+        })
+    ],
     resolve: {
         extensions: [ '.js' ]
     }
