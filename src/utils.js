@@ -2,7 +2,7 @@
  * Created by qhyang on 2018/1/15.
  */
 
-import { Color, Vector3, MeshLambertMaterial, MeshPhongMaterial, EdgesHelper, PlaneGeometry } from 'three';
+import * as THREE from 'three';
 import { ConvexGeometry } from './vendors/three/ConvexGeometry'
 import Physijs from './vendors/physijs/physi';
 import './vendors/three/ConvexGeometry';
@@ -22,9 +22,13 @@ const models = [
     ],
 
     generateTile = ({ color, restitution = .95 } = {}) => {
-        const geometry = new ConvexGeometry(models[0].map(vertex => new Vector3(vertex[0], vertex[1], vertex[2]))),
+        const rotationXMatrix = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), Math.PI * Math.floor(Math.random() * 2));
+        const rotationYMatrix = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0, 1, 0), Math.PI * Math.floor(Math.random() * 2));
+        const rotationZMatrix = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0, 0, 1), Math.PI / 2 * Math.floor(Math.random() * 4));
+
+        const geometry = new ConvexGeometry(models[0].map(vertex => new THREE.Vector3(vertex[0], vertex[1], vertex[2]).applyMatrix4(rotationXMatrix).applyMatrix4(rotationYMatrix).applyMatrix4(rotationZMatrix))),
             material = Physijs.createMaterial(
-                new MeshPhongMaterial({
+                new THREE.MeshPhongMaterial({
                     emissive: color,
                     color,
                     specular: 0x222222,
@@ -34,24 +38,20 @@ const models = [
                 }),
             1, restitution),
             mesh = new Physijs.ConvexMesh(geometry, material),
-            frame = new EdgesHelper(mesh, 0xffffff);
+            frame = new THREE.EdgesHelper(mesh, 0xffffff);
 
-        frame.material.opacity = new Color(color).getHSL().l / 8.5;
+        frame.material.opacity = new THREE.Color(color).getHSL().l / 8.5;
         frame.material.transparent = true;
 
         mesh.add(frame);
-
-        mesh.rotation.x = Math.PI * Math.floor(Math.random() * 2);
-        mesh.rotation.y = Math.PI * Math.floor(Math.random() * 2);
-        mesh.rotation.z = Math.PI / 2 * Math.floor(Math.random() * 4);
 
         return mesh;
     },
 
     generatePlane = ({ width, height, opacity = 1, restitution = .7, texture } = {}) => {
-        const geometry = new PlaneGeometry(width, height, 1, 1),
+        const geometry = new THREE.PlaneGeometry(width, height, 1, 1),
             material = Physijs.createMaterial(
-                new MeshLambertMaterial({
+                new THREE.MeshLambertMaterial({
                     map: texture || null,
                     opacity: opacity,
                     transparent: true
