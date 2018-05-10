@@ -550,7 +550,7 @@ export default class ThreeAudioVisualization {
         });
     }
 
-    switchMode(mode) {
+    async switchMode(mode) {
         const tweens = this._tweens;
 
         tweens.tiles0.concat(tweens.tiles1).concat(tweens.tiles2).forEach(tween => {
@@ -594,38 +594,40 @@ export default class ThreeAudioVisualization {
                     });
                 });
 
-                setTimeout(() => {
-                    tweens.camera1
-                        .to({
-                            lookAtX: this._ground.position.x,
-                            lookAtY: this._ground.position.y + 130,
-                            lookAtZ: this._ground.position.z
-                        }, 2800, createjs.Ease.quartInOut)
-                        .paused = false;
+                await new Promise(resolve => {
+                    setTimeout(() => {
+                        tweens.camera1
+                            .to({
+                                lookAtX: this._ground.position.x,
+                                lookAtY: this._ground.position.y + 130,
+                                lookAtZ: this._ground.position.z
+                            }, 2800, createjs.Ease.quartInOut)
+                            .paused = false;
 
-                    tweens.ground
-                        .to({
-                            opacity: 1
-                        }, 2800, createjs.Ease.quartInOut)
-                        .paused = false;
+                        tweens.ground
+                            .to({
+                                opacity: 1
+                            }, 2800, createjs.Ease.quartInOut)
+                            .paused = false;
 
-                    tweens.spotLight
-                        .to({
-                            x: 0,
-                            y: 50,
-                            z: 0,
-                            intensity: 2
-                        }, 2800, createjs.Ease.quartInOut)
-                        .paused = false;
+                        tweens.spotLight
+                            .to({
+                                x: 0,
+                                y: 50,
+                                z: 0,
+                                intensity: 2
+                            }, 2800, createjs.Ease.quartInOut)
+                            .call(resolve)
+                            .paused = false;
 
-                    this._spotLight.target = this._ground;
-                }, 900);
+                        this._spotLight.target = this._ground;
+                    }, 900);
+                });
 
                 break;
 
             case 'basic':
                 this._simulating = false;
-                this.switchLayout(this._currentLayout);
 
                 tweens.camera1
                     .to({
@@ -651,6 +653,7 @@ export default class ThreeAudioVisualization {
                     .paused = false;
 
                 this._spotLight.target = this._scene;
+                await this.switchLayout(this._currentLayout);
 
                 break;
         }

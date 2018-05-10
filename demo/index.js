@@ -93,14 +93,16 @@ const interval = setInterval(moveLight, 20000);
 
 const generalToolBar = document.querySelector('#tool-bar__general');
 
-generalToolBar.querySelector('.mode_physics').addEventListener('click', () => {
+generalToolBar.querySelector('.mode_physics').addEventListener('click', async () => {
     clearInterval(interval);
     clearTimeout(timeout);
-    threeAudioVisualization.switchMode('physics');
+    await threeAudioVisualization.switchMode('physics');
+    console.log('switching mode finish');
 });
 
-generalToolBar.querySelector('.mode_basic').addEventListener('click', () => {
-    threeAudioVisualization.switchMode('basic');
+generalToolBar.querySelector('.mode_basic').addEventListener('click', async () => {
+    await threeAudioVisualization.switchMode('basic');
+    console.log('switching mode finish');
 });
 
 generalToolBar.querySelector('.show').addEventListener('click', () => {
