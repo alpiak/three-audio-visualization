@@ -36,6 +36,7 @@ export default class ThreeAudioVisualization {
         ground: null,
         domElement: null
     };
+    _promiseRejectFunctions = {};
 
     /**
      * Init the scene.
@@ -410,12 +411,13 @@ export default class ThreeAudioVisualization {
             let direction = Math.random() > .5 ? 1 : -1;
 
             const animate = async () => {
-                await this.floatTile(index, offset * direction, { color });
-
-                if (tile.floating === true) {
-                    direction *= -1;
-                    animate();
-                }
+                this.floatTile(index, offset * direction, { color })
+                    .then(() => {
+                        if (tile.floating === true) {
+                            direction *= -1;
+                            animate();
+                        }
+                    });
             };
 
             animate();
@@ -473,31 +475,21 @@ export default class ThreeAudioVisualization {
         this._tiles.forEach((tile, index) => {
             const tileBody = tile.body;
 
-            if (!this._tweens.tiles0[index]) {
-                this._tweens.tiles0[index] = this._getTileTween0(index);
-            } else {
-                this._tweens.tiles0[index].to({
-                    color: '#' + new Color(tile.color).offsetHSL(0, 0, tile.lightness).getHexString(),
-                    rotationX: Math.floor(tileBody.rotation.x / Math.PI) * Math.PI,
-                    rotationY: Math.floor(tileBody.rotation.y / Math.PI) * Math.PI,
-                    rotationZ: Math.floor(tileBody.rotation.z / Math.PI) * Math.PI,
-                    opacity: tileBody.material.opacity / .8
-                }, 0);
+            if (this._tweens.tiles0[index]) {
+                createjs.Tween.removeTweens(this._tweens.tiles0[index].target);
             }
+
+            this._tweens.tiles0[index] = this._getTileTween0(index);
 
             if (!this._tweens.tiles1[index]) {
                 this._tweens.tiles1[index] = this._getTileTween1(index);
             }
 
-            if (!this._tweens.tiles2[index]) {
-                this._tweens.tiles2[index] = this._getTileTween2(index);
-            } else {
-                this._tweens.tiles2[index].to({
-                    x: tileBody.position.x,
-                    y: tileBody.position.y,
-                    z: tileBody.position.z
-                }, 0);
+            if (this._tweens.tiles2[index]) {
+                createjs.Tween.removeTweens(this._tweens.tiles2[index].target);
             }
+
+            this._tweens.tiles2[index] = this._getTileTween2(index);
 
             const tween0 = this._tweens.tiles0[index],
                 tween2 = this._tweens.tiles2[index];
@@ -527,7 +519,20 @@ export default class ThreeAudioVisualization {
             }
         });
 
-        return new Promise(resolve => setTimeout(() => resolve(), 1000));
+        const reject = this._promiseRejectFunctions['switchLayout'];
+
+        if (reject) {
+            reject();
+        }
+
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve();
+                this._promiseRejectFunctions['switchLayout'] = null;
+            }, 1000);
+
+            this._promiseRejectFunctions['switchLayout'] = reject;
+        });
     }
 
     moveLight({ x, y, z, duration } = {}) {
