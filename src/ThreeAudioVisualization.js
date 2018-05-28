@@ -4,7 +4,7 @@
 
 import { WebGLRenderer, Color, Vector2, Vector3, TextureLoader, SpotLight, PCFSoftShadowMap, AxesHelper, SpotLightHelper, PerspectiveCamera } from 'three';
 import Physijs from './vendors/physijs/physi';
-import { createjs } from './vendors/createjs/tweenjs';
+import './vendors/createjs/tweenjs';
 import ColorPlugin from './vendors/createjs/ColorPlugin';
 
 import { generateTile, generatePlane, glow, getLayout } from './utils';
@@ -12,6 +12,8 @@ import { musicNote } from './layouts';
 
 Physijs.scripts.worker = require('./vendors/physijs/physijs_worker.js');
 Physijs.scripts.ammo = require('ammo.js');
+
+const createjs = window.createjs;
 
 ColorPlugin.install(createjs);
 
@@ -232,7 +234,6 @@ export default class ThreeAudioVisualization {
         }
 
         return new Promise(resolve => {
-
             tween
                 .to({
                     rotationX: tile.rotationX + rotationX,
@@ -312,7 +313,7 @@ export default class ThreeAudioVisualization {
                 break;
         }
 
-        tile.color = color;
+        color && (tile.color = color);
 
         return new Promise(resolve => {
             tween.to(target, 500, createjs.Ease.quadInOut)
@@ -473,8 +474,6 @@ export default class ThreeAudioVisualization {
         }
 
         this._tiles.forEach((tile, index) => {
-            const tileBody = tile.body;
-
             if (this._tweens.tiles0[index]) {
                 createjs.Tween.removeTweens(this._tweens.tiles0[index].target);
             }
@@ -492,11 +491,17 @@ export default class ThreeAudioVisualization {
             this._tweens.tiles2[index] = this._getTileTween2(index);
 
             const tween0 = this._tweens.tiles0[index],
-                tween2 = this._tweens.tiles2[index];
+                tween2 = this._tweens.tiles2[index],
+                tileBody = tile.body;
 
             if (index < tilesData.length) {
                 tween0
-                    .to({ opacity: 1 }, 1000, createjs.Ease.quintOut)
+                    .to({
+                        rotationX: Math.floor(tileBody.rotation.x / 2 / Math.PI) * 2  * Math.PI,
+                        rotationY: Math.floor(tileBody.rotation.y / Math.PI)* Math.PI,
+                        rotationZ: Math.floor(tileBody.rotation.z / 2 / Math.PI) * 2 * Math.PI,
+                        opacity: 1
+                    }, 1000, createjs.Ease.quintOut)
                     .paused = false;
 
                 tween2
@@ -522,7 +527,7 @@ export default class ThreeAudioVisualization {
         const reject = this._promiseRejectFunctions['switchLayout'];
 
         if (reject) {
-            reject();
+            reject('animation overrode');
         }
 
         return new Promise((resolve, reject) => {
@@ -653,6 +658,11 @@ export default class ThreeAudioVisualization {
                     .paused = false;
 
                 this._spotLight.target = this._scene;
+
+                this._tiles.forEach(tile => {
+                    tile.rotationX = tile.rotationY = tile.rotationZ = undefined;
+                });
+
                 await this.switchLayout(this._currentLayout);
 
                 break;
@@ -800,9 +810,9 @@ export default class ThreeAudioVisualization {
         const tile = this._tiles[index],
             body = tile.body,
             tween = createjs.Tween.get({
-                rotationX: Math.floor(body.rotation.x / Math.PI) * Math.PI,
-                rotationY: Math.floor(body.rotation.y / Math.PI) * Math.PI,
-                rotationZ: Math.floor(body.rotation.z / Math.PI) * Math.PI,
+                rotationX: Math.floor(body.rotation.x / 2 / Math.PI) * 2  * Math.PI,
+                rotationY: Math.floor(body.rotation.y / Math.PI)* Math.PI,
+                rotationZ: Math.floor(body.rotation.z / 2 / Math.PI) * 2 * Math.PI,
                 color: '#' + new Color(tile.color).offsetHSL(0, 0, tile.lightness).getHexString(),
                 opacity: body.material.opacity / .8
             });

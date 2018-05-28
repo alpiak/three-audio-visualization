@@ -63,8 +63,10 @@ tilesAnimationToolBar.querySelector('.float-stop').addEventListener('click', () 
 
 const layoutAnimationToolBar = document.querySelector('#tool-bar__layout-animation');
 
-layoutAnimationToolBar.querySelector('.switch').addEventListener('click', () => {
-    threeAudioVisualization.switchLayout(layoutAnimationToolBar.querySelector('.type').value);
+layoutAnimationToolBar.querySelector('.switch').addEventListener('click', async () => {
+    console.log('start switching layout');
+    await threeAudioVisualization.switchLayout(layoutAnimationToolBar.querySelector('.type').value);
+    console.log('stop switching layout');
 });
 
 let timeout;

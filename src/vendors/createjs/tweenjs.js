@@ -31,9 +31,9 @@
 // extend.js
 //##############################################################################
 
-this.createjs = this.createjs||{};
+window.createjs = window.createjs||{};
 
-var createjs = this.createjs;
+var createjs = window.createjs;
 
 /**
  * @class Utility Methods
@@ -69,7 +69,7 @@ createjs.extend = function(subclass, superclass) {
 // promote.js
 //##############################################################################
 
-this.createjs = this.createjs||{};
+window.createjs = window.createjs||{};
 
 /**
  * @class Utility Methods
@@ -129,7 +129,7 @@ createjs.promote = function(subclass, prefix) {
 // deprecate.js
 //##############################################################################
 
-this.createjs = this.createjs||{};
+window.createjs = window.createjs||{};
 
 /**
  * @class Utility Methods
@@ -171,7 +171,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 // Event.js
 //##############################################################################
 
-this.createjs = this.createjs||{};
+window.createjs = window.createjs||{};
 
 (function() {
 	"use strict";
@@ -385,7 +385,7 @@ this.createjs = this.createjs||{};
 // EventDispatcher.js
 //##############################################################################
 
-this.createjs = this.createjs||{};
+window.createjs = window.createjs||{};
 
 (function() {
 	"use strict";
@@ -766,7 +766,7 @@ this.createjs = this.createjs||{};
 // Ticker.js
 //##############################################################################
 
-this.createjs = this.createjs||{};
+window.createjs = window.createjs||{};
 
 (function() {
 	"use strict";
@@ -1349,7 +1349,7 @@ this.createjs = this.createjs||{};
 // AbstractTween.js
 //##############################################################################
 
-this.createjs = this.createjs||{};
+window.createjs = window.createjs||{};
 
 (function() {
 	"use strict";
@@ -1883,7 +1883,7 @@ this.createjs = this.createjs||{};
 // Tween.js
 //##############################################################################
 
-this.createjs = this.createjs||{};
+window.createjs = window.createjs||{};
 
 (function() {
 	"use strict";
@@ -2686,7 +2686,7 @@ this.createjs = this.createjs||{};
 // Timeline.js
 //##############################################################################
 
-this.createjs = this.createjs||{};
+window.createjs = window.createjs||{};
 
 
 (function() {
@@ -2873,7 +2873,7 @@ this.createjs = this.createjs||{};
 // Ease.js
 //##############################################################################
 
-this.createjs = this.createjs||{};
+window.createjs = window.createjs||{};
 
 (function() {
 	"use strict";
@@ -3307,7 +3307,7 @@ this.createjs = this.createjs||{};
 // MotionGuidePlugin.js
 //##############################################################################
 
-this.createjs = this.createjs||{};
+window.createjs = window.createjs||{};
 
 (function() {
 	"use strict";
@@ -3804,7 +3804,7 @@ this.createjs = this.createjs||{};
 // version.js
 //##############################################################################
 
-this.createjs = this.createjs || {};
+window.createjs = window.createjs || {};
 
 (function() {
 	"use strict";
