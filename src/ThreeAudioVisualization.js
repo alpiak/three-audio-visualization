@@ -17,7 +17,7 @@ const createjs = window.createjs;
 
 ColorPlugin.install(createjs);
 
-let _onMouseMove;
+let _handleMouseMove, _handleDeviceOrientation;
 
 export default class ThreeAudioVisualization {
     _scene;
@@ -698,89 +698,94 @@ export default class ThreeAudioVisualization {
 
     async enableReactiveCamera() {
         const _previousVec2 = new Vector2,
-            _vec2 = new Vector2,
+            _vec2 = new Vector2;
 
-            _handleMouseMove = e => {
-                _vec2.set(e.x, e.y);
+        _handleMouseMove = e => {
+            _vec2.set(e.x, e.y);
 
-                if (_vec2.distanceTo(_previousVec2) > 30) {
-                    _previousVec2.set(e.x, e.y);
+            if (_vec2.distanceTo(_previousVec2) > 30) {
+                _previousVec2.set(e.x, e.y);
 
-                    const ratioX = e.x / window.innerWidth,
-                        ratioY = e.y / window.innerHeight,
-                        radX = Math.PI / 6 * (ratioX - .5),
-                        radY = Math.PI / 6 * (ratioY - .5);
+                const ratioX = e.x / window.innerWidth,
+                    ratioY = e.y / window.innerHeight,
+                    radX = Math.PI / 6 * (ratioX - .5),
+                    radY = Math.PI / 6 * (ratioY - .5);
 
-                    (this._tweens.camera0 = this._getCameraTween0())
-                        .to({
-                            x: Math.sin(radX) * 650,
-                            y: Math.sin(radY) * 650 * -1,
-                            z: Math.cos(radX) * Math.cos(radY) * 650
-                        }, 800, createjs.Ease.quartOut)
-                        .paused = false;
-                }
-            },
+                (this._tweens.camera0 = this._getCameraTween0())
+                    .to({
+                        x: Math.sin(radX) * 650,
+                        y: Math.sin(radY) * 650 * -1,
+                        z: Math.cos(radX) * Math.cos(radY) * 650
+                    }, 800, createjs.Ease.quartOut)
+                    .paused = false;
+            }
+        };
 
-            _handleDeviceOrientation = e => {
-                _vec2.set(e.gamma, e.beta);
+        _handleDeviceOrientation = e => {
+            _vec2.set(e.gamma, e.beta);
 
-                if (_vec2.distanceTo(_previousVec2) > 3) {
-                    _previousVec2.set(e.gamma, e.beta);
+            if (_vec2.distanceTo(_previousVec2) > 3) {
+                _previousVec2.set(e.gamma, e.beta);
 
-                    const radX = Math.PI / 3 * e.gamma / 180,
-                        radY = (() => {
-                            let _beta = e.beta - 51;
+                const radX = Math.PI / 3 * e.gamma / 180,
+                    radY = (() => {
+                        let _beta = e.beta - 51;
 
-                            if (e.beta + 90 < 51) {
-                                _beta = 39 + e.beta + 90;
-                            } else {
-                                _beta = e.beta - 51;
-                            }
-
-                            return Math.PI / 3 * _beta  / 180 * -1;
-                        })();
-
-                    (this._tweens.camera0 = this._getCameraTween0())
-                        .to({
-                            x: Math.sin(radX) * 650,
-                            y: Math.sin(radY) * 650 * -1,
-                            z: Math.cos(radX) * Math.cos(radY) * 650
-                        }, 800, createjs.Ease.quartOut)
-                        .paused = false;
-                }
-            },
-            deviceOrientation = await new Promise((resolve) => {
-                const _handleMouseMove = () => {
-                        document.removeEventListener('mousemove', _handleMouseMove);
-                        document.removeEventListener('deviceorientation', _handleDeviceOrientation);
-                        resolve(false);
-                    },
-
-                    _handleDeviceOrientation = e => {
-                        document.removeEventListener('mousemove', _handleMouseMove);
-                        document.removeEventListener('deviceorientation', _handleDeviceOrientation);
-
-                        if (e.alpha || e.beta || e.gamma) {
-                            resolve(true);
+                        if (e.beta + 90 < 51) {
+                            _beta = 39 + e.beta + 90;
                         } else {
-                            resolve(false);
+                            _beta = e.beta - 51;
                         }
-                    };
+
+                        return Math.PI / 3 * _beta  / 180 * -1;
+                    })();
+
+                (this._tweens.camera0 = this._getCameraTween0())
+                    .to({
+                        x: Math.sin(radX) * 650,
+                        y: Math.sin(radY) * 650 * -1,
+                        z: Math.cos(radX) * Math.cos(radY) * 650
+                    }, 800, createjs.Ease.quartOut)
+                    .paused = false;
+            }
+        };
+
+        const deviceOrientation = await new Promise((resolve) => {
+            const _handleMouseMove = () => {
+                    window.removeEventListener('mousemove', _handleMouseMove);
+                    window.removeEventListener('deviceorientation', _handleDeviceOrientation);
+                    resolve(false);
+                },
+
+                _handleDeviceOrientation = e => {
+                    window.removeEventListener('mousemove', _handleMouseMove);
+                    window.removeEventListener('deviceorientation', _handleDeviceOrientation);
+
+                    if (e.alpha || e.beta || e.gamma) {
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
+                };
 ;
-                document.addEventListener('mousemove', _handleMouseMove);
-                document.addEventListener('deviceorientation', _handleDeviceOrientation);
-            });
+            window.addEventListener('mousemove', _handleMouseMove);
+            window.addEventListener('deviceorientation', _handleDeviceOrientation);
+        });
 
         if (deviceOrientation) {
-            document.addEventListener('deviceorientation', _handleDeviceOrientation);
+            window.addEventListener('deviceorientation', _handleDeviceOrientation);
         } else {
-            document.addEventListener('mousemove', _handleMouseMove);
+            window.addEventListener('mousemove', _handleMouseMove);
         }
     }
 
     disableReactiveCamera() {
-        if (_onMouseMove) {
-            document.removeEventListener('mousemove', _onMouseMove);
+        if (_handleMouseMove) {
+            window.removeEventListener('mousemove', _handleMouseMove);
+        }
+
+        if (_handleDeviceOrientation) {
+            window.removeEventListener('mousemove', _handleDeviceOrientation);
         }
     }
 

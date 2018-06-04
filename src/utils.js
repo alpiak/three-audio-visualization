@@ -12,7 +12,7 @@ import { musicNote, play, pause, stop, previousTrack, nextTrack } from './layout
 
 const models = [
         [
-            [-3, -9, -3], [2, 2, -3.8],
+            [-3.5, -9, -3], [2.5, 7, -4],
             [-10, -10, -2], [-10, 10, -2], [10, 10, -2], [10, -10, -2],
             [-11, -10, -1], [-10, -11, -1], [-11, 10, -1], [-10, 11, -1], [11, 10, -1], [10, 11, -1], [11, -10, -1], [10, -11, -1],
             [-11, -10, 1], [-10, -11, 1], [-11, 10, 1], [-10, 11, 1], [11, 10, 1], [10, 11, 1], [11, -10, 1], [10, -11, 1],
@@ -36,16 +36,9 @@ const models = [
                     opacity: .8,
                     transparent: true
                 }),
-            1, restitution),
-            mesh = new Physijs.ConvexMesh(geometry, material),
-            frame = new THREE.EdgesHelper(mesh, 0xffffff);
+            1, restitution);
 
-        frame.material.opacity = new THREE.Color(color).getHSL().l / 8.5;
-        frame.material.transparent = true;
-
-        mesh.add(frame);
-
-        return mesh;
+        return new Physijs.ConvexMesh(geometry, material);
     },
 
     generatePlane = ({ width, height, opacity = 1, restitution = .7, texture } = {}) => {

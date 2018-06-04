@@ -5,7 +5,7 @@
 import { Howl } from 'howler';
 import Clubber from 'clubber';
 
-import ThreeAudioVisualization from '../dist/ThreeAudioVisualization';
+import ThreeAudioVisualization from '../src/ThreeAudioVisualization';
 
 const threeAudioVisualization = new ThreeAudioVisualization;
 
@@ -116,6 +116,7 @@ generalToolBar.querySelector('.show').addEventListener('click', () => {
 generalToolBar.querySelector('.hide').addEventListener('click', () => {
     threeAudioVisualization.hide();
     threeAudioVisualization.pause();
+    threeAudioVisualization.disableReactiveCamera();
 });
 
 const physicsToolBar = document.querySelector('#tool-bar__physics');
