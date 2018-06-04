@@ -830,7 +830,7 @@ export default class ThreeAudioVisualization {
             body.material.emissive.setStyle(color);
             body.material.color.setStyle(color);
             body.material.opacity = tweenTarget.opacity * .8;
-            body.children[0].material.opacity = body.material.color.getHSL().l / 85 * tweenTarget.opacity;
+            // body.children[0].material.opacity = body.material.color.getHSL().l / 85 * tweenTarget.opacity;
 
             if (tweenTarget.opacity < .5) {
                 // tile.children[1].visible = false;
